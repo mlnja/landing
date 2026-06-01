@@ -11,8 +11,11 @@ const searchParams = Astro.url.searchParams;
 const categoryFilter = searchParams.get('cat');
 
 const filteredPosts = categoryFilter
-  ? sortedPosts.filter(post => post.data.category === categoryFilter)
+  ? sortedPosts.filter(post => post.data.lifecycle === categoryFilter || post.data.category === categoryFilter)
   : sortedPosts;
+
+// Get latest post from filtered results for featured section
+const latestPost = filteredPosts[0];
 ---
 
 <Layout title="Blog · MLOps.Ninja" active="blog">
@@ -87,6 +90,46 @@ const filteredPosts = categoryFilter
     </div>
   </section>
 
+  <!-- Featured/Latest Post -->
+  {latestPost && (
+    <section class="featured" data-cat={latestPost.data.lifecycle || latestPost.data.category}>
+      <div class="container">
+        <a href={`/blog/${latestPost.id.split('/').pop()?.replace(/\.(md|mdx)$/, '') || latestPost.id}`} class="featured__inner">
+          <div class="featured__media">
+            <span class="label">Featured <em>· Latest</em></span>
+            {latestPost.data.cover?.src ? (
+              <Image
+                src={latestPost.data.cover.src}
+                alt={latestPost.data.cover.alt}
+                widths={[600, 900, 1200]}
+                sizes="(max-width: 760px) 100vw, 60vw"
+                class="featured__image"
+              />
+            ) : (
+              <div class="placeholder">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+                  <path d="M3 12c0-4 4-8 9-8 7 0 9 4 9 8s-2 8-9 8c-5 0-9-4-9-8Z"/>
+                  <path d="M9 9v6l5-3z" fill="currentColor" stroke="none"/>
+                </svg>
+                <span>[ hero image ]</span>
+              </div>
+            )}
+          </div>
+          <div class="featured__body">
+            <div class="featured__cat">{latestPost.data.lifecycle || latestPost.data.category || 'Blog'}</div>
+            <h2 class="featured__title">{latestPost.data.title}</h2>
+            <p class="featured__excerpt">{latestPost.data.snippet}</p>
+            <div class="featured__meta">
+              <span class="author">{latestPost.data.author}</span>
+              <span>{new Date(latestPost.data.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+              <span class="read">Read</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+  )}
+
   <!-- Posts Grid -->
   <section class="posts-section">
     <div class="container">
@@ -154,15 +197,57 @@ const filteredPosts = categoryFilter
   const readoutNow = document.getElementById('readoutNow');
   const readout = document.querySelector('.filter-readout');
   const loopHint = document.querySelector('.loop-hint');
+  const featured = document.querySelector('.featured');
 
   function apply(cat) {
     const set = GROUPS[cat] || (cat === 'all' ? null : [cat]);
     let shown = 0;
+    let firstMatch = null;
+
+    // Filter posts
     posts.forEach(p => {
       const match = !set || set.includes(p.dataset.cat);
       p.style.display = match ? '' : 'none';
-      if (match) shown++;
+      if (match) {
+        shown++;
+        if (!firstMatch) firstMatch = p;
+      }
     });
+
+    // Update featured section with the latest post from filtered category
+    if (featured && firstMatch) {
+      const href = firstMatch.getAttribute('href');
+      const title = firstMatch.querySelector('.post-card__title')?.textContent;
+      const excerpt = firstMatch.querySelector('.post-card__desc')?.textContent;
+      const category = firstMatch.querySelector('.post-card__cat')?.textContent;
+      const author = firstMatch.querySelector('.post-card__meta .author')?.textContent;
+      const date = firstMatch.querySelector('.post-card__meta span:nth-child(2)')?.textContent?.replace('· ', '');
+      const imgSrc = firstMatch.querySelector('.post-card__image')?.src;
+
+      // Update featured link
+      const featuredLink = featured.querySelector('.featured__inner');
+      if (featuredLink) featuredLink.href = href;
+
+      // Update featured content
+      if (title) featured.querySelector('.featured__title').textContent = title;
+      if (excerpt) featured.querySelector('.featured__excerpt').textContent = excerpt;
+      if (category) featured.querySelector('.featured__cat').textContent = category;
+      if (author) featured.querySelector('.featured__meta .author').textContent = author;
+      if (date) featured.querySelector('.featured__meta span:nth-child(2)').textContent = date;
+
+      // Update image if exists
+      const featuredMedia = featured.querySelector('.featured__media');
+      const featuredImg = featuredMedia?.querySelector('img');
+      if (featuredImg && imgSrc) {
+        featuredImg.src = imgSrc;
+        featuredImg.srcset = imgSrc;
+      }
+
+      featured.style.display = '';
+    } else if (featured && !firstMatch) {
+      // No matching posts, hide featured
+      featured.style.display = 'none';
+    }
 
     // loop highlight: dim non-matching segments, mark the active one
     segs.forEach(s => {
@@ -284,15 +369,18 @@ const filteredPosts = categoryFilter
   }
   .filter-readout .now { color: var(--on-surface); font-weight: 600; }
   .filter-readout .clear {
-    display: none;
     background: var(--on-surface); color: #fff; border: 0;
     font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em;
     text-transform: uppercase; padding: 6px 10px; cursor: pointer;
     text-decoration: none;
     border-radius: var(--radius-xs);
+    display: inline-flex; align-items: center; gap: 6px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 150ms ease;
   }
   .filter-readout .clear:hover { background: var(--primary); }
-  .filter-readout.is-filtered .clear { display: inline-flex; align-items: center; gap: 6px; }
+  .filter-readout.is-filtered .clear { opacity: 1; pointer-events: auto; }
 
   /* Loop (reused from homepage) */
   .loop-stage { position: relative; width: 100%; aspect-ratio: 600 / 340; max-width: 680px; margin-left: auto; }
@@ -335,6 +423,142 @@ const filteredPosts = categoryFilter
   }
   .loop-hint .arrow { display: inline-block; width: 14px; height: 1px; background: var(--on-surface-muted); position: relative; }
   .loop-hint .arrow::after { content: ""; position: absolute; right: 0; top: -2px; width: 5px; height: 5px; border-top: 1px solid var(--on-surface-muted); border-right: 1px solid var(--on-surface-muted); transform: rotate(45deg); }
+
+  /* Featured section */
+  .featured {
+    padding: var(--space-7) 0;
+  }
+  .featured__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--space-1);
+    border: 1px solid var(--hairline);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 200ms ease;
+  }
+  .featured__inner:hover {
+    border-color: var(--on-surface-variant);
+  }
+  .featured__media {
+    position: relative;
+    align-self: start;
+    aspect-ratio: 4 / 3;
+    background:
+      linear-gradient(135deg, rgba(14,165,233,.10) 0%, rgba(234,87,255,.08) 100%),
+      repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .featured__media .placeholder {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .featured__media .placeholder svg {
+    opacity: .35;
+  }
+  .featured__media .label {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    background: rgba(255,255,255,.95);
+    padding: 6px 10px;
+    color: var(--on-surface);
+    z-index: 1;
+  }
+  .featured__media .label em {
+    font-style: normal;
+    color: var(--primary-container);
+    margin-left: 6px;
+  }
+  .featured__inner:hover .featured__media .label {
+    background: var(--primary-container);
+    color: #ffffff;
+  }
+  .featured__inner:hover .featured__media .label em {
+    color: #ffffff;
+  }
+  .featured__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .featured__body {
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    background: var(--surface-container-lowest);
+    border-left: 1px solid var(--hairline);
+  }
+  .featured__cat {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary-container);
+    margin-bottom: var(--space-3);
+  }
+  .featured__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-3);
+    text-wrap: balance;
+  }
+  .featured__inner:hover .featured__title {
+    color: var(--primary);
+  }
+  .featured__excerpt {
+    font-size: 16px;
+    color: var(--on-surface-variant);
+    line-height: 1.6;
+    margin: 0 0 var(--space-4);
+  }
+  .featured__meta {
+    margin-top: auto;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--hairline);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+  }
+  .featured__meta .author {
+    color: var(--on-surface);
+    font-weight: 600;
+  }
+  .featured__meta .read {
+    margin-left: auto;
+    color: var(--on-surface);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .featured__meta .read::after {
+    content: "→";
+    font-family: var(--font-body);
+  }
 
   /* Posts section */
   .posts-section {
@@ -439,5 +663,15 @@ const filteredPosts = categoryFilter
 
   @media (max-width: 900px) {
     .blog-hero__inner, .posts-grid { grid-template-columns: 1fr; }
+    .featured__inner {
+      grid-template-columns: 1fr;
+    }
+    .featured__media {
+      aspect-ratio: 16 / 9;
+    }
+    .featured__body {
+      border-left: none;
+      border-top: 1px solid var(--hairline);
+    }
   }
 </style>
