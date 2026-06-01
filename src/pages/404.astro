@@ -1,15 +1,64 @@
 ---
-import Container from "@components/container.astro";
-import Layout from "@layouts/Layout.astro";
+import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="404 Not Found">
-  <Container>
-    <div class="min-h-[calc(100vh-16rem)] flex items-center justify-center">
-      <div class="mt-16 text-center">
-        <h1 class="text-4xl lg:text-5xl font-bold lg:tracking-tight">404</h1>
-        <p class="text-lg mt-4 text-slate-600">Page not found.</p>
+<Layout title="404 · Page not found">
+  <section class="error-page">
+    <div class="container error-page__inner">
+      <div class="error-code">404</div>
+      <h1>Page not found.</h1>
+      <p>
+        The page you're looking for doesn't exist or has been moved.
+      </p>
+      <div class="error-actions">
+        <a href="/" class="btn btn--primary">← Back to home</a>
+        <a href="/blog" class="btn btn--ghost">Browse the journal</a>
       </div>
     </div>
-  </Container>
+  </section>
 </Layout>
+
+<style>
+  .error-page {
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    padding: var(--space-9) 0;
+  }
+  .error-page__inner {
+    max-width: 640px;
+    text-align: center;
+  }
+  .error-code {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(80px, 15vw, 140px);
+    line-height: 1;
+    letter-spacing: -0.03em;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: var(--space-3);
+  }
+  .error-page h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 var(--space-3);
+  }
+  .error-page p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--on-surface-variant);
+    margin: 0 0 var(--space-6);
+  }
+  .error-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+</style>

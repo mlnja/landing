@@ -1,0 +1,386 @@
+---
+export interface Props {
+  active?: string;
+}
+
+const { active = '' } = Astro.props;
+
+const services = [
+  { slug: 'eda', label: 'EDA', blurb: 'Exploratory Data Analysis', color: 'sky' },
+  { slug: 'data-prep', label: 'Data Prep', blurb: 'Pipelines & feature store', color: 'sky' },
+  { slug: 'develop', label: 'Develop', blurb: 'Model training & experiments', color: 'sky' },
+  { slug: 'retrain', label: '(Re)Train', blurb: 'Continual training & drift', color: 'sky' },
+  { slug: 'deploy', label: 'Deploy', blurb: 'CI/CD & rollout', color: 'fuchsia' },
+  { slug: 'inference', label: 'Inference', blurb: 'Serving & runtime', color: 'fuchsia' },
+  { slug: 'monitor', label: 'Monitor', blurb: 'Observability & alerts', color: 'fuchsia' },
+  { slug: 'review', label: 'Review', blurb: 'Incident & perf review', color: 'fuchsia' },
+  { slug: 'ml', label: 'ML', blurb: 'The model side, end-to-end', color: 'ink' },
+  { slug: 'ops', label: 'Ops', blurb: 'The production side, end-to-end', color: 'ink' },
+];
+---
+
+<header class="topbar">
+  <div class="container topbar__inner">
+    <a class="brand" href="/">
+      <span class="brand__mark"><img src="/assets/logo.svg" alt="" /></span>
+      <span><span class="brand__name">MLOps</span><span class="brand__suffix">.Ninja</span></span>
+    </a>
+
+    <button class="nav__toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-menu">
+      <span class="nav__toggle-bar"></span>
+      <span class="nav__toggle-bar"></span>
+      <span class="nav__toggle-bar"></span>
+    </button>
+
+    <div class="topbar__menu" id="site-menu">
+      <nav class="nav">
+        <div class="nav__dropwrap">
+          <button class={`nav__item nav__item--menu ${active === 'lifecycle' ? 'is-active' : ''}`} aria-haspopup="true" aria-expanded="false">
+            Lifecycle
+            <svg class="nav__caret" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M2.5 4.5 L6 8 L9.5 4.5"/>
+            </svg>
+          </button>
+          <div class="nav__dropdown" role="menu">
+            {services.map(s => (
+              <a class="nav__drop-item" href={`/blog?cat=${s.slug}`}>
+                <span class={`nav__drop-dot nav__drop-dot--${s.color}`}></span>
+                <span class="nav__drop-label">
+                  <span class="nav__drop-name">{s.label}</span>
+                  <span class="nav__drop-blurb">{s.blurb}</span>
+                </span>
+              </a>
+            ))}
+          </div>
+        </div>
+        <a class={`nav__item ${active === 'about' ? 'is-active' : ''}`} href="/about">About</a>
+        <a class={`nav__item ${active === 'blog' ? 'is-active' : ''}`} href="/blog">Blog</a>
+        <a class={`nav__item ${active === 'contact' ? 'is-active' : ''}`} href="/contact">Contact</a>
+      </nav>
+      <div class="topbar__cta">
+        <a href="https://github.com/mlnja" target="_blank" rel="noopener" class="btn btn--primary btn--sm">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/>
+          </svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<script>
+  // Mobile menu toggle
+  const toggle = document.querySelector('.nav__toggle');
+  const topbar = document.querySelector('.topbar');
+  const menu = document.getElementById('site-menu');
+
+  if (toggle && topbar && menu) {
+    toggle.addEventListener('click', () => {
+      const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+      topbar.classList.toggle('is-menu-open');
+    });
+  }
+
+  // Dropdown functionality
+  document.querySelectorAll('.nav__item--menu').forEach(btn => {
+    const wrap = btn.closest('.nav__dropwrap');
+    if (!wrap) return;
+
+    const dropdown = wrap.querySelector('.nav__dropdown');
+
+    const setOpen = (v: boolean) => {
+      btn.setAttribute('aria-expanded', v ? 'true' : 'false');
+      wrap.classList.toggle('is-open', v);
+      if (v && dropdown) positionDropdown(wrap as HTMLElement);
+    };
+
+    // Position dropdown to not clip viewport
+    const positionDropdown = (wrap: HTMLElement) => {
+      const dd = wrap.querySelector('.nav__dropdown') as HTMLElement;
+      if (!dd) return;
+      const rect = wrap.getBoundingClientRect();
+      const ddRect = dd.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      const spill = rect.left + ddRect.width - viewportWidth + 24;
+      if (spill > 0) dd.style.left = `-${spill}px`;
+      else dd.style.left = '0';
+    };
+
+    wrap.addEventListener('mouseenter', () => positionDropdown(wrap as HTMLElement));
+    wrap.addEventListener('focusin', () => positionDropdown(wrap as HTMLElement));
+    wrap.addEventListener('focusout', () => {
+      if (!wrap.contains(document.activeElement)) setOpen(false);
+    });
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.nav__dropwrap.is-open').forEach(w => {
+        if (w !== wrap) {
+          w.classList.remove('is-open');
+          const b = w.querySelector('.nav__item--menu');
+          if (b) b.setAttribute('aria-expanded', 'false');
+        }
+      });
+      setOpen(!wrap.classList.contains('is-open'));
+    });
+  });
+
+  // Close dropdown on outside click or Escape
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (!target.closest('.nav__dropwrap')) {
+      document.querySelectorAll('.nav__dropwrap.is-open').forEach(w => {
+        w.classList.remove('is-open');
+        const b = w.querySelector('.nav__item--menu');
+        if (b) b.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.nav__dropwrap.is-open').forEach(w => {
+        w.classList.remove('is-open');
+        const b = w.querySelector('.nav__item--menu');
+        if (b) b.setAttribute('aria-expanded', 'false');
+      });
+    }
+  });
+</script>
+
+<style>
+  /* Styles embedded from chrome.js */
+  .topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(255,255,255,.86);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .topbar__inner {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    height: 68px;
+    gap: var(--space-5);
+  }
+  .topbar__inner > .brand { justify-self: start; }
+  .topbar__menu { display: contents; }
+  .topbar__inner .nav { justify-self: center; }
+  .topbar__inner .topbar__cta { justify-self: end; }
+
+  .nav__toggle {
+    display: none;
+    justify-self: end;
+    width: 42px; height: 42px;
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 5px;
+    background: transparent; border: 0; cursor: pointer;
+    padding: 0; border-radius: var(--radius-sm);
+  }
+  .nav__toggle:focus-visible { outline: 2px solid var(--primary-container); outline-offset: 2px; }
+  .nav__toggle-bar {
+    width: 22px; height: 2px; background: var(--on-surface);
+    transition: transform 220ms ease, opacity 160ms ease;
+  }
+  .topbar.is-menu-open .nav__toggle-bar:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .topbar.is-menu-open .nav__toggle-bar:nth-child(2) { opacity: 0; }
+  .topbar.is-menu-open .nav__toggle-bar:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.012em;
+    color: var(--on-surface);
+  }
+  .brand__mark { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; }
+  .brand__mark img { width: 100%; height: 100%; display: block; }
+  .brand__name { color: var(--on-surface); }
+  .brand__suffix { color: var(--on-surface-muted); }
+
+  .nav { display: flex; gap: 36px; align-items: center; }
+  .nav__item {
+    position: relative;
+    font-family: var(--font-body);
+    font-size: 14.5px; font-weight: 500;
+    color: var(--on-surface-variant);
+    padding: 4px 0;
+    background: transparent;
+    border: 0;
+    border-bottom: 1.5px solid transparent;
+    transition: color 160ms, border-color 160ms;
+    display: inline-flex; align-items: center; gap: 6px;
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 0;
+    line-height: 1.4;
+  }
+  .nav__item:focus { outline: none; }
+  .nav__item:focus-visible {
+    outline: 2px solid var(--primary-container);
+    outline-offset: 4px;
+  }
+  .nav__item:hover { color: var(--on-surface); }
+  .nav__item.is-active {
+    color: var(--on-surface);
+    border-bottom-color: var(--primary-container);
+  }
+  .nav__caret {
+    width: 9px; height: 9px;
+    transition: transform 180ms;
+  }
+  .nav__item--menu[aria-expanded="true"] .nav__caret,
+  .nav__item--menu:hover .nav__caret {
+    transform: rotate(180deg);
+  }
+
+  .nav__dropwrap { position: relative; }
+  .nav__dropdown {
+    position: absolute;
+    top: calc(100% + 14px);
+    left: 0;
+    transform: translateY(-4px);
+    background: #fff;
+    border: 1px solid var(--hairline);
+    box-shadow: var(--shadow-float);
+    padding: 12px;
+    width: min(640px, calc(100vw - 24px));
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 160ms, transform 200ms;
+    z-index: 60;
+  }
+  @media (max-width: 600px) {
+    .nav__dropdown { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 380px) {
+    .nav__dropdown { grid-template-columns: 1fr; }
+  }
+  .nav__dropwrap:hover .nav__dropdown,
+  .nav__dropwrap:focus-within .nav__dropdown,
+  .nav__dropwrap.is-open .nav__dropdown {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
+  .nav__dropwrap::after {
+    content: "";
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    height: 18px;
+  }
+  .nav__drop-item {
+    display: flex; gap: 12px; align-items: center;
+    padding: 12px 14px;
+    text-decoration: none;
+    color: var(--on-surface);
+    transition: background 140ms;
+    border-radius: var(--radius-sm);
+  }
+  .nav__drop-item:hover { background: var(--surface-container-low); }
+  .nav__drop-dot {
+    width: 10px; height: 10px;
+    flex-shrink: 0;
+    border: 2.5px solid var(--primary-container);
+    background: #fff;
+  }
+  .nav__drop-dot--sky { border-color: var(--primary-container); }
+  .nav__drop-dot--ink { border-color: var(--on-surface); background: var(--on-surface); }
+  .nav__drop-dot--fuchsia { border-color: var(--secondary-container); }
+  .nav__drop-label {
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .nav__drop-name {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 15px;
+    letter-spacing: -0.005em;
+    color: var(--on-surface);
+    line-height: 1.1;
+  }
+  .nav__drop-blurb {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+    line-height: 1;
+  }
+
+  @media (max-width: 760px) {
+    .topbar__inner {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+    .nav__toggle { display: inline-flex; }
+
+    .topbar__menu {
+      display: block;
+      position: absolute;
+      top: 100%; left: 0; right: 0;
+      background: #fff;
+      border-bottom: 1px solid var(--hairline);
+      box-shadow: var(--shadow-float);
+      padding: 0 max(20px, env(safe-area-inset-left));
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transition: max-height 260ms ease, opacity 180ms ease;
+    }
+    .topbar.is-menu-open .topbar__menu {
+      max-height: calc(100vh - 68px);
+      overflow-y: auto;
+      opacity: 1;
+      pointer-events: auto;
+      padding-top: var(--space-2);
+      padding-bottom: var(--space-4);
+    }
+
+    .nav {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      width: 100%;
+    }
+    .nav__item {
+      width: 100%;
+      font-size: 16px;
+      padding: 16px 2px;
+      border-bottom: 1px solid var(--hairline);
+      border-radius: 0;
+    }
+    .nav__item.is-active { border-bottom-color: var(--hairline); color: var(--primary); }
+    .nav__dropwrap { width: 100%; }
+    .nav__item--menu { justify-content: space-between; }
+
+    .nav__dropdown {
+      position: static;
+      width: 100%;
+      left: auto;
+      transform: none;
+      display: none;
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding: 4px 0 12px;
+      border: 0;
+      box-shadow: none;
+      background: transparent;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .nav__dropwrap.is-open .nav__dropdown { display: grid; }
+    .nav__drop-item { padding: 11px 12px; }
+
+    .topbar__cta {
+      width: 100%;
+      padding-top: var(--space-3);
+    }
+    .topbar__cta .btn { width: 100%; justify-content: center; }
+  }
+</style>

@@ -1,0 +1,49 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#faf8ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#eef0ff;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="brandGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ea57ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:1" />
+    </linearGradient>
+    <radialGradient id="glow1" cx="30%" cy="40%">
+      <stop offset="0%" style="stop-color:#ea57ff;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#ea57ff;stop-opacity:0" />
+    </radialGradient>
+    <radialGradient id="glow2" cx="70%" cy="60%">
+      <stop offset="0%" style="stop-color:#0ea5e9;stop-opacity:0.12" />
+      <stop offset="100%" style="stop-color:#0ea5e9;stop-opacity:0" />
+    </radialGradient>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Podkova:wght@700;800&amp;family=JetBrains+Mono:wght@600&amp;display=swap');
+      .title { font-family: 'Podkova', serif; font-weight: 800; font-size: 84px; fill: #131b2e; letter-spacing: -0.03em; }
+      .subtitle { font-family: 'Podkova', serif; font-weight: 700; font-size: 36px; fill: #3e4850; letter-spacing: -0.015em; }
+      .tag { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 16px; fill: #6e7881; letter-spacing: 0.16em; text-transform: uppercase; }
+      .gradient-text { fill: url(#brandGradient); }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)"/>
+
+  <!-- Glows -->
+  <ellipse cx="360" cy="250" rx="400" ry="350" fill="url(#glow1)"/>
+  <ellipse cx="840" cy="380" rx="400" ry="350" fill="url(#glow2)"/>
+
+  <!-- Decorative line -->
+  <rect x="100" y="140" width="280" height="3" fill="url(#brandGradient)" rx="1.5"/>
+
+  <!-- Content -->
+  <text x="100" y="220" class="tag">Production Machine Learning</text>
+
+  <text x="100" y="330" class="title">MLOps<tspan class="gradient-text">.Ninja</tspan></text>
+
+  <text x="100" y="400" class="subtitle">Field notes, strong opinions,</text>
+  <text x="100" y="450" class="subtitle">and tools you can clone.</text>
+
+  <!-- Bottom accent -->
+  <rect x="100" y="510" width="60" height="2" fill="#ea57ff" rx="1"/>
+  <rect x="170" y="510" width="120" height="2" fill="#0ea5e9" rx="1"/>
+</svg>

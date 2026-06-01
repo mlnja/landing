@@ -1,0 +1,482 @@
+---
+draft: true
+title: "Stop Wrapping Your Tools in Skills"
+snippet: "Why CLI-Based Agent Skills Break Production Workflows"
+cover: {
+  src: "./docker-in-mlops.png",
+  alt: "Local TLS development setup"
+}
+publishDate: "2026-04-30"
+author: "virviil"
+tags: ["development", "tls", "security", "devops"]
+lifecycle: "develop"
+lifecycleSection: "dev"
+---
+
+## TL;DR
+
+- Skills solve **uncertainty**
+- Production workflows already **eliminate uncertainty**
+- Using Skills (especially with CLI) in workflows:
+  - adds unnecessary reasoning
+  - increases latency and cost
+  - breaks observability
+  - introduces runtime complexity
+
+> You didn’t remove context. You deferred it — and paid for it later.
+
+---
+
+## The Pitch: “Skills Fix Context Bloat”
+
+With the introduction of Claude Skills, the narrative became:
+
+> MCP connects tools. Skills teach the model how to use them.  
+> https://www.anthropic.com/news/model-context-protocol
+
+And:
+
+> Skills reduce the need to overload the system prompt.  
+> https://docs.anthropic.com/en/docs/build-with-claude/skills
+
+---
+
+## The Reality: This Breaks in Production Workflows
+
+Example:
+
+Webhook → Enrich → Classify → Call API → Store → Notify
+
+In these systems:
+- steps are predefined  
+- tools are predefined  
+- execution is deterministic  
+
+👉 There is no discovery problem.
+
+---
+
+## Core Claim
+
+Skills solve uncertainty.  
+Production workflows do not have uncertainty.
+
+---
+
+## Deferred Context Tax
+
+You didn’t remove context.  
+You turned it into runtime cost.
+
+---
+
+## CLI Is the Real Problem
+
+CLI requires:
+- OS
+- shell
+- dependencies
+- environment
+
+This is not abstraction.  
+This is infrastructure.
+
+---
+
+## Final Punchline
+
+You took a deterministic system  
+and reintroduced uncertainty into it.
+
+
+
+
+Skills vs MCP: Why CLI-Based Agent Skills Are an Architectural Anti-Pattern in Production Workflows
+TL;DR
+Skills solve uncertainty in interactive agents
+Production workflows already eliminate uncertainty
+Using Skills (especially with CLI) in workflows adds:
+unnecessary reasoning
+runtime complexity
+token overhead
+instability
+
+You didn’t remove context. You deferred it — and paid for it later.
+
+The Narrative We’re Being Sold
+
+After the introduction of Anthropic Skills, the dominant message became:
+
+“MCP connects tools. Skills teach the model how to use them.”
+— Anthropic, Extending Claude with Skills & MCP
+
+At first glance, this makes sense:
+
+MCP → structured tool access
+Skills → reusable workflows and instructions
+
+And importantly, Skills are positioned as a solution to context bloat:
+
+Don’t load everything upfront
+Load capabilities only when needed
+The Problem: This Breaks Down in Production Workflows
+
+This narrative works well for:
+
+chat assistants
+open-ended agents
+unknown user intent
+
+But it breaks in:
+
+production agentic workflows
+
+Think:
+
+Webhook → Enrich → Classify → Call API → Store → Notify
+
+In these systems:
+
+steps are known in advance
+tools are known in advance
+contracts are known in advance
+execution order is deterministic
+
+There is no discovery problem.
+
+Core Claim
+
+Skills solve uncertainty.
+Production workflows do not have uncertainty.
+
+Skills Assume Discovery. Workflows Remove It.
+
+In an interactive agent:
+
+User → LLM → decide → load skill → act
+
+Discovery is necessary.
+
+In a workflow:
+
+Trigger → Node A → Node B → Node C
+
+There is nothing to discover.
+
+The Anti-Pattern
+
+When you introduce Skills into a workflow node:
+
+Node
+  → LLM
+    → discover skill
+    → load instructions
+    → interpret
+    → construct CLI call
+    → execute
+
+You are forcing the system to:
+
+rediscover what it already knows
+
+This Is Not Flexibility
+
+This is redundant reasoning.
+
+Deferred Context Tax
+
+Skills are often justified as a way to reduce prompt size.
+
+But what actually happens:
+
+Before (system prompt)
+All instructions loaded upfront
+After (skills)
+Agent decides → loads skill → reads instructions → executes
+
+You didn’t remove context.
+
+You moved it from “initial load” to “runtime cost”.
+
+Why This Matters
+
+In workflows:
+
+the same step runs repeatedly
+the same tool is used repeatedly
+
+So instead of:
+
+Pay once
+
+You get:
+
+Pay every execution
+Skills as Tool Documentation = Anti-Pattern
+
+A very common misuse:
+
+Skill = instructions for how to call a tool
+
+This is fundamentally wrong.
+
+Tool usage should be defined in:
+
+schema
+descriptions
+examples
+validation rules
+
+If the model needs to:
+
+“read a manual before calling a tool”
+
+then your interface is broken.
+
+CLI Makes Everything Worse
+
+Now we add the second layer of problems.
+
+CLI is string-based
+my_tool --user-id=123 --limit=10
+
+The model must:
+
+guess flags
+serialize arguments
+format correctly
+handle errors
+
+Compare with MCP:
+
+{
+  "user_id": 123,
+  "limit": 10
+}
+
+→ typed
+→ validated
+→ predictable
+
+CLI Requires a Runtime
+
+This is the most underestimated issue.
+
+To run a CLI skill, you need:
+
+an OS
+a shell
+dependencies
+environment configuration
+permissions
+sandboxing
+
+This is not “just a skill”.
+
+This is an execution environment.
+
+MCP: Execution Without Coupling
+
+MCP separates concerns:
+
+LLM → reasoning
+external system → execution
+
+Execution can live anywhere:
+
+Lambda
+container
+microservice
+remote API
+
+The agent doesn’t care.
+
+Skills Collapse These Layers
+
+With CLI-based skills:
+
+reasoning and execution blur together
+execution happens “through the model”
+contracts become implicit
+Observability Degrades
+
+With MCP:
+
+tool name
+arguments
+result
+errors
+
+With Skills + CLI:
+
+reasoning noise
+hidden retries
+stdout parsing
+implicit failures
+
+Harder to:
+
+debug
+monitor
+trace
+Error Surface Explodes
+
+The model can:
+
+not find the skill
+choose the wrong one
+misinterpret instructions
+generate invalid CLI
+fail to parse output
+
+This is:
+
+probabilistic execution
+
+Latency Becomes Unpredictable
+
+Skill pipeline:
+
+think → load → think → fix → retry → run
+
+MCP:
+
+call → done
+Caching Breaks
+
+MCP:
+
+cache(tool_name, args)
+
+Skills:
+
+no stable key
+reasoning involved
+implicit transformations
+Security Becomes Harder
+
+CLI introduces:
+
+filesystem access
+process execution
+network access
+
+Which means:
+
+sandboxing
+privilege control
+injection risks
+
+MCP:
+
+API boundary
+permission layer
+easier isolation
+Key Insight
+
+Skills reintroduce decision-making where no decision is needed.
+
+And This Is the Real Problem
+
+In production systems, unnecessary decisions are not intelligence.
+They are a liability.
+
+“But Nodes Can Be Agents”
+
+Yes — and that’s fine.
+
+Workflow
+  ├── Step 1 (API)
+  ├── Step 2 (Agent)
+  ├── Step 3 (DB)
+
+The important constraint:
+
+The agent is local to the node.
+
+What Breaks the System
+Node
+  → Agent
+    → Skills
+      → CLI
+
+Now the node becomes:
+
+implicit
+non-deterministic
+hard to observe
+Architecture Boundary
+
+A better model:
+
+Layer	Responsibility
+Workflow	Orchestration
+Node	Bounded logic
+Agent	Local reasoning
+Tools (MCP)	Typed contracts
+Execution	External runtime
+Where Skills Fit
+
+Skills are useful for:
+
+domain knowledge
+complex reasoning patterns
+reusable workflows (for agents)
+interactive systems
+Where They Don’t
+
+Skills are not:
+
+tool APIs
+execution layer
+CLI wrappers
+workflow steps
+The Shift Already Happening
+
+The ecosystem is moving from:
+
+agent-first
+
+to:
+
+workflow-first
+
+LangGraph itself distinguishes between:
+
+workflows (deterministic)
+agents (dynamic)
+https://docs.langchain.com/oss/python/langgraph/workflows-agents
+Supporting Signals
+Growing focus on structured tool calling (OpenAI, Anthropic, etc.)
+Rising interest in typed agents and contracts
+Increasing complaints about:
+cost
+latency
+debugging complexity
+
+Research also highlights issues with tool usability and descriptions:
+
+Tool documentation quality significantly affects agent performance
+(e.g. recent work on tool-use benchmarks and agent reliability)
+Final Take
+
+Skills are not bad.
+
+But:
+
+Using Skills as an execution layer in production workflows is.
+
+The Real Boundary
+
+Skills = memory & workflows
+MCP = execution & contracts
+
+When you cross this boundary:
+
+cost increases
+reliability drops
+complexity explodes
+Final Punchline
+
+You took a deterministic system
+and reintroduced uncertainty into it.

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>You don't need venv in Docker · MLOps.Ninja</title>
+<link rel="stylesheet" href="../styles/tokens.css" />
+<style>
+  body { background: var(--surface-container-lowest); }
+
+  /* ============ POST META ============ */
+  .post-meta {
+    padding: var(--space-7) 0 var(--space-4);
+  }
+  .breadcrumbs {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: var(--space-3);
+  }
+  .breadcrumbs a { color: var(--on-surface-muted); text-decoration: none; }
+  .breadcrumbs a:hover { color: var(--on-surface); }
+  .breadcrumbs .sep { margin: 0 8px; color: var(--outline-variant); }
+
+  .post-cat {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--primary-container);
+    margin-bottom: var(--space-3);
+  }
+  .post-cat .sep { color: var(--outline-variant); margin: 0 10px; }
+
+  .post-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(40px, 5.5vw, 76px);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    margin: 0 0 var(--space-4);
+    max-width: 920px;
+    text-wrap: balance;
+  }
+  .post-title code {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    background: var(--surface-container);
+    border: 1px solid var(--hairline);
+    padding: 2px 12px;
+    font-size: 0.78em;
+    border-radius: var(--radius-xs);
+    vertical-align: middle;
+  }
+
+  .post-byline {
+    display: flex; align-items: center; gap: 14px;
+    margin-bottom: var(--space-5);
+    flex-wrap: wrap;
+  }
+  .post-byline .avatar {
+    width: 36px; height: 36px;
+    background:
+      linear-gradient(135deg, rgba(14,165,233,.4), rgba(234,87,255,.4));
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: #fff;
+    font-size: 13px;
+  }
+  .post-byline .avatar img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.5); transform-origin: center 30%; display: block; }
+  .post-byline .name {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--on-surface);
+  }
+  .post-byline .meta {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+  }
+  .post-tags {
+    display: flex; flex-wrap: wrap; gap: 6px;
+    margin-left: auto;
+  }
+  .post-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--on-surface-variant);
+    padding: 5px 9px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    letter-spacing: 0.04em;
+  }
+
+  /* ============ HERO IMAGE ============ */
+  .post-hero {
+    margin: 0 0 var(--space-6);
+    background:
+      linear-gradient(135deg, rgba(14,165,233,.12) 0%, rgba(234,87,255,.10) 100%);
+    border: 1px solid var(--hairline);
+    aspect-ratio: 16 / 7;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .post-hero .placeholder {
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; gap: 14px;
+  }
+  .post-hero .placeholder svg { opacity: .4; }
+  .post-hero .credit {
+    position: absolute; bottom: 12px; right: 16px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    background: rgba(255,255,255,.85);
+    padding: 4px 8px;
+  }
+  .post-hero-rule {
+    height: 2px;
+    margin: 0 auto var(--space-5);
+    max-width: 280px;
+    background: linear-gradient(90deg, transparent, rgba(234,87,255,.5), rgba(14,165,233,.5), transparent);
+  }
+
+  /* ============ ARTICLE BODY ============ */
+  .article {
+    max-width: 740px;
+    margin: 0 auto;
+    padding: 0 0 var(--space-9);
+  }
+  .article > * + * { margin-top: var(--space-3); }
+  .article p {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--on-surface);
+    margin: 0;
+  }
+  .article p.lede {
+    font-size: 22px;
+    line-height: 1.55;
+    color: var(--on-surface);
+    font-weight: 500;
+    text-wrap: pretty;
+  }
+  .article h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: var(--space-7) 0 var(--space-3);
+    color: var(--on-surface);
+    text-wrap: balance;
+  }
+  .article h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin: var(--space-5) 0 var(--space-2);
+  }
+  .article code {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    background: var(--surface-container);
+    padding: 2px 7px;
+    border-radius: var(--radius-xs);
+    color: var(--on-surface);
+  }
+  .article a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-decoration-color: rgba(14,165,233,.3);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 160ms;
+  }
+  .article a:hover { text-decoration-color: var(--primary); }
+
+  .article ul, .article ol {
+    padding-left: 0;
+    list-style: none;
+    margin: 0;
+  }
+  .article ul li, .article ol li {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--on-surface);
+    padding: 4px 0 4px 28px;
+    position: relative;
+  }
+  .article ul li::before {
+    content: "";
+    position: absolute;
+    left: 4px; top: 16px;
+    width: 6px; height: 6px;
+    background: var(--primary-container);
+  }
+  .article ol { counter-reset: olist; }
+  .article ol li {
+    counter-increment: olist;
+  }
+  .article ol li::before {
+    content: counter(olist, decimal-leading-zero);
+    position: absolute;
+    left: 0; top: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  .article blockquote {
+    margin: var(--space-5) 0;
+    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+    border-left: 3px solid var(--primary-container);
+    background: var(--surface);
+    font-family: var(--font-display);
+    font-size: 24px;
+    line-height: 1.35;
+    color: var(--on-surface);
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+  .article blockquote p { font-size: inherit; }
+  .article blockquote cite {
+    display: block;
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--on-surface-muted);
+    font-style: normal;
+    letter-spacing: 0.04em;
+  }
+
+  /* Code block */
+  .article pre {
+    margin: var(--space-4) 0;
+    background: var(--inverse-surface);
+    color: #e7ecf7;
+    border: 1px solid var(--inverse-surface);
+    padding: var(--space-3) var(--space-4);
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    position: relative;
+  }
+  .article pre code {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    line-height: 1.65;
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    border-radius: 0;
+  }
+  .article pre .lang {
+    position: absolute; top: 10px; right: 14px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.4);
+  }
+  .article pre .k { color: #ea57ff; }   /* keyword */
+  .article pre .s { color: #ffb87f; }   /* string */
+  .article pre .c { color: rgba(255,255,255,.4); font-style: italic; } /* comment */
+  .article pre .n { color: #0ea5e9; }   /* identifier / cmd */
+
+  .callout {
+    margin: var(--space-5) 0;
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--secondary-container);
+    border-radius: var(--radius-sm);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .callout__icon {
+    width: 32px; height: 32px;
+    background: rgba(234,87,255,.10);
+    color: var(--secondary);
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 14px;
+  }
+  .callout__title {
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--secondary);
+    margin: 4px 0 4px;
+  }
+  .callout__body p { font-size: 16px; line-height: 1.55; margin: 0; color: var(--on-surface); }
+
+  /* ============ FOOTER OF POST ============ */
+  .post-foot {
+    max-width: 740px; margin: 0 auto;
+    padding: var(--space-5) 0 var(--space-7);
+    border-top: 1px solid var(--hairline);
+  }
+  .post-foot__author {
+    display: grid;
+    grid-template-columns: 60px 1fr auto;
+    gap: var(--space-3);
+    align-items: center;
+  }
+  .post-foot__author .avatar {
+    width: 60px; height: 60px;
+    background: linear-gradient(135deg, rgba(14,165,233,.4), rgba(234,87,255,.4));
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: #fff;
+    font-size: 20px;
+  }
+  .post-foot__author .avatar img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.5); transform-origin: center 30%; display: block; }
+  .post-foot__author .name { font-family: var(--font-display); font-weight: 700; font-size: 18px; margin: 0; }
+  .post-foot__author .bio { font-size: 13.5px; color: var(--on-surface-variant); margin: 4px 0 0; }
+  .post-foot__author .more {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--on-surface);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+  .post-foot__author .more:hover { color: var(--primary); }
+
+  /* ============ RELATED ============ */
+  .related {
+    border-top: 1px solid var(--hairline);
+    background: var(--surface);
+    padding: var(--space-7) 0;
+  }
+  .related__head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: var(--space-4);
+  }
+  .related__head h2 {
+    font-family: var(--font-display); font-weight: 700; font-size: 24px;
+    letter-spacing: -0.015em; margin: 0;
+  }
+  .related__head a {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--on-surface); text-decoration: none; font-weight: 600;
+  }
+  .related__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+  .related__post {
+    display: flex; flex-direction: column;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    padding: var(--space-3) var(--space-4);
+    text-decoration: none; color: inherit;
+    transition: border-color 200ms;
+  }
+  .related__post:hover { border-color: var(--on-surface-variant); }
+  .related__post .cat {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--primary-container);
+    margin-bottom: 8px;
+  }
+  .related__post .ttl {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 17px;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+  }
+  .related__post .meta {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+    display: flex; gap: 8px;
+  }
+  .related__post .meta .author { color: var(--on-surface); font-weight: 600; }
+</style>
+</head>
+<body data-screen-label="Blog post · venv in Docker">
+
+<script>window.SITE_BASE = "../";</script>
+<header id="site-header" data-active="blog"></header>
+
+<!-- POST META -->
+<section class="post-meta">
+  <div class="container">
+    <div class="breadcrumbs">
+      <a href="../index.html">Home</a><span class="sep">/</span>
+      <a href="../blog.html">Blog</a><span class="sep">/</span>
+      <span>Deploy</span>
+    </div>
+    <div class="post-cat">
+      Model Deployment <span class="sep">|</span> Deploy
+    </div>
+    <h1 class="post-title">You don't need <code>venv</code> in Docker.</h1>
+    <div class="post-byline">
+      <a class="avatar" href="../connect/dmitry.html" aria-label="Connect with Dmitry Rubinstein"><img src="../assets/people/dmitry.png" alt="Dmitry Rubinstein" /></a>
+      <div>
+        <div class="name">Dmitry Rubinstein</div>
+        <div class="meta">Jun 12, 2025 · 7 min read</div>
+      </div>
+      <div class="post-tags">
+        <span class="post-tag">#docker</span>
+        <span class="post-tag">#containers</span>
+        <span class="post-tag">#python</span>
+        <span class="post-tag">#venv</span>
+        <span class="post-tag">#uv</span>
+        <span class="post-tag">#packaging</span>
+        <span class="post-tag">#deployment</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HERO IMAGE -->
+<section class="container">
+  <div class="post-hero">
+    <div class="placeholder">
+      <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+        <path d="M3 10h4V6h4v4h4V6h4v4h2v6c0 1-1 2-2 2H4c-1 0-2-1-2-2v-4l1-2Z"/>
+        <path d="M9 14h.01M13 14h.01M17 14h.01"/>
+      </svg>
+      <span>[ hero illustration — sad whale carrying a -venv folder ]</span>
+    </div>
+    <span class="credit">Illustration by team</span>
+  </div>
+  <div class="post-hero-rule"></div>
+</section>
+
+<!-- ARTICLE -->
+<article class="article">
+
+  <p class="lede">Let's be blunt.</p>
+
+  <p>If your Dockerfile starts with <code>python -m venv</code>, you've already taken a wrong turn.</p>
+
+  <p>This may feel controversial, but it shouldn't be: in 2025, we have better tools and a clearer mental model of what a container actually <em>is</em>. The TL;DR — the container is the environment. You don't need another one inside it.</p>
+
+  <h2>Why people reach for <code>venv</code> in Docker</h2>
+
+  <p>It's muscle memory. Outside Docker, virtual environments protect you from the host's Python, your other projects, and the seventeen abandoned <code>pip install</code>s you forgot you ran in 2022. Reaching for <code>venv</code> is the first thing most Python developers do on a new machine.</p>
+
+  <p>So when the same developer writes their first Dockerfile, the muscle takes over. <code>FROM python:3.12</code>, <code>python -m venv /venv</code>, <code>ENV PATH=/venv/bin:$PATH</code>. Off to the races.</p>
+
+  <p>The problem is that none of the reasons you wanted a venv on your laptop apply inside a container.</p>
+
+  <h2>What you're actually protecting against</h2>
+
+  <p>A <code>venv</code> protects you from three things:</p>
+
+  <ol>
+    <li>The system Python installation shared with other tools.</li>
+    <li>Other projects on the same machine with different dependencies.</li>
+    <li>Your own accumulated cruft over years on the same box.</li>
+  </ol>
+
+  <p>Inside a Docker image, none of these exist. There <em>is</em> no other project. There <em>is</em> no system Python you care about — the image is the system, and you control it. And there is no cruft, because the image is built from scratch every time.</p>
+
+  <blockquote>
+    The container is the venv. Adding a second one is a tax on every developer who has to read your Dockerfile.
+    <cite>— a thing we say in code review</cite>
+  </blockquote>
+
+  <h2>The four-line Dockerfile</h2>
+
+  <p>Here's what we actually use on most Python services:</p>
+
+  <pre><span class="lang">Dockerfile</span><code><span class="k">FROM</span> python:3.12-slim
+<span class="k">WORKDIR</span> /app
+<span class="k">COPY</span> requirements.txt .
+<span class="k">RUN</span> pip install --no-cache-dir -r requirements.txt
+<span class="k">COPY</span> . .
+<span class="k">CMD</span> [<span class="s">"python"</span>, <span class="s">"-m"</span>, <span class="s">"app"</span>]</code></pre>
+
+  <p>Six lines, but the four that matter are <code>WORKDIR</code>, <code>COPY</code>, <code>RUN pip install</code>, and <code>COPY</code>. No venv, no <code>PATH</code> manipulation, no two-stage dance.</p>
+
+  <p>Want it reproducible? Pin your requirements. Want it small? Switch to <code>python:3.12-alpine</code> or a distroless base. Want it fast to build? Use <code>uv</code> instead of <code>pip</code> — same model, just faster:</p>
+
+  <pre><span class="lang">Dockerfile</span><code><span class="k">FROM</span> python:3.12-slim
+<span class="k">COPY</span> --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+<span class="k">WORKDIR</span> /app
+<span class="k">COPY</span> pyproject.toml uv.lock .
+<span class="k">RUN</span> uv sync --frozen --no-install-project
+<span class="k">COPY</span> . .
+<span class="k">RUN</span> uv sync --frozen
+<span class="k">CMD</span> [<span class="s">"uv"</span>, <span class="s">"run"</span>, <span class="s">"app"</span>]</code></pre>
+
+  <p>Notice what's still missing: the venv. <code>uv sync</code> manages its own environment under the hood; you don't activate anything. The container is still the environment.</p>
+
+  <div class="callout">
+    <div class="callout__icon">!</div>
+    <div class="callout__body">
+      <div class="callout__title">When you do need it</div>
+      <p>There's one case where we relent: multi-stage builds where you want to copy a fully resolved environment from a builder stage to a distroless final image. In that narrow case, a venv is a portable directory of dependencies you can <code>COPY --from=builder</code>. It's a packaging trick, not an isolation tool.</p>
+    </div>
+  </div>
+
+  <h2>The actual cost of leaving it in</h2>
+
+  <p>"It works, who cares?" Fair question. Three reasons we care:</p>
+
+  <ul>
+    <li><strong>Build time.</strong> Creating the venv is a wasted layer. Activating it requires <code>ENV PATH</code> manipulation that confuses every linter and IDE that reads your Dockerfile.</li>
+    <li><strong>Cognitive load.</strong> The next person to read your image sees <code>/venv/bin/python</code> and wonders what they're insulated from. Spoiler: nothing.</li>
+    <li><strong>Cargo cult.</strong> Once one project does it, every project does it. We've audited deployments where four of the seven services had different venv setups for no defensible reason.</li>
+  </ul>
+
+  <h2>What to do instead</h2>
+
+  <p>Delete the venv. Pin your requirements. If you've got a complex build with native dependencies, use a multi-stage build to separate compile from runtime. If you want speed, use <code>uv</code>. If you want safety, run as a non-root user and use a distroless base.</p>
+
+  <p>None of that needs <code>python -m venv</code>. None of it ever did.</p>
+
+  <p>— Dmitry</p>
+
+</article>
+
+<!-- POST FOOT (author) -->
+<section class="container">
+  <div class="post-foot">
+    <div class="post-foot__author">
+      <a class="avatar" href="../connect/dmitry.html" aria-label="Connect with Dmitry Rubinstein"><img src="../assets/people/dmitry.png" alt="Dmitry Rubinstein" /></a>
+      <div>
+        <p class="name">Dmitry Rubinstein</p>
+        <p class="bio">MLOps Ninja at MLOps.Ninja. Twelve years between research code and live inference — usually both at once.</p>
+      </div>
+      <a class="more" href="../connect/dmitry.html">Connect with Dmitry →</a>
+    </div>
+  </div>
+</section>
+
+<!-- RELATED -->
+<section class="related">
+  <div class="container">
+    <div class="related__head">
+      <h2>Related field notes</h2>
+      <a href="../blog.html">All posts →</a>
+    </div>
+    <div class="related__grid">
+      <a class="related__post" href="#">
+        <span class="cat">Deploy · Inference</span>
+        <h3 class="ttl">Triton, vLLM, or just FastAPI? A decision framework.</h3>
+        <div class="meta"><span class="author">Dmitry Rubinstein</span><span>May 18, 2025</span></div>
+      </a>
+      <a class="related__post" href="#">
+        <span class="cat">Develop · Tooling</span>
+        <h3 class="ttl">Stop tracking experiments in your notebook filename.</h3>
+        <div class="meta"><span class="author">Ilya Dvorkin</span><span>May 28, 2025</span></div>
+      </a>
+      <a class="related__post" href="#">
+        <span class="cat">Monitor · Drift</span>
+        <h3 class="ttl">Drift metrics that aren't KL divergence.</h3>
+        <div class="meta"><span class="author">Ilya Dvorkin</span><span>May 04, 2025</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+<script src="../chrome.js"></script>
+
+</body>
+</html>

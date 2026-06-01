@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MLOps.Ninja — An open journal &amp; workshop on production ML.</title>
+<link rel="stylesheet" href="styles/tokens.css" />
+<style>
+  body { background: var(--surface-container-lowest); }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: var(--space-9) 0 var(--space-8);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -20%; right: -10%;
+    width: 70%; height: 140%;
+    background:
+      radial-gradient(ellipse at 60% 40%, rgba(234,87,255,.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 30% 60%, rgba(14,165,233,.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero__grid {
+    display: grid;
+    grid-template-columns: minmax(380px, 1fr) minmax(440px, 1.1fr);
+    gap: var(--space-7);
+    align-items: center;
+    position: relative;
+  }
+  .hero__eyebrow {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: var(--space-3);
+  }
+  .hero__eyebrow .dot {
+    width: 7px; height: 7px;
+    background: var(--secondary-container);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(234,87,255,.15);
+  }
+  .hero__eyebrow .label {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+  .hero__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(46px, 5.6vw, 80px);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-4);
+    color: var(--on-surface);
+    text-wrap: balance;
+  }
+  .hero__title em {
+    font-style: normal;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero__sub {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--on-surface-variant);
+    margin: 0 0 var(--space-5);
+    max-width: 500px;
+    text-wrap: pretty;
+  }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .btn .gh { width: 16px; height: 16px; }
+
+  .hero__sig {
+    display: flex; gap: var(--space-5); margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--hairline);
+  }
+  .hero__sig-item { display: flex; flex-direction: column; gap: 4px; }
+  .hero__sig-item .k {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+  .hero__sig-item .v {
+    font-family: var(--font-display);
+    font-size: 15px; font-weight: 600;
+    color: var(--on-surface);
+    letter-spacing: -0.005em;
+  }
+
+  /* ---- Infinity loop (brand signature) ---- */
+  .loop-stage {
+    position: relative; width: 100%;
+    aspect-ratio: 600 / 340; max-width: 700px; margin-left: auto;
+  }
+  .loop-stage::before {
+    content: ""; position: absolute; inset: -8%;
+    background:
+      radial-gradient(ellipse 46% 60% at 28% 50%, rgba(14,165,233,.12) 0%, transparent 70%),
+      radial-gradient(ellipse 46% 60% at 72% 50%, rgba(234,87,255,.12) 0%, transparent 70%);
+    filter: blur(26px); pointer-events: none;
+  }
+  .loop-svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+  .seg { cursor: pointer; transition: filter 200ms ease, opacity 200ms ease; }
+  a:hover .seg { filter: brightness(1.08) saturate(1.06); }
+  .seg-label {
+    font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+    letter-spacing: 0.1em; fill: #ffffff; pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+  }
+  .big-label {
+    font-family: var(--font-display); font-weight: 700; font-size: 46px;
+    letter-spacing: 0.01em; fill: var(--on-surface);
+    cursor: pointer; transition: fill 200ms, letter-spacing 200ms;
+  }
+  .big-label:hover { fill: var(--secondary); letter-spacing: 0.04em; }
+  .loop-hint {
+    position: absolute; pointer-events: none;
+    left: 50%; bottom: -44px; transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+    display: flex; align-items: center; gap: 10px; white-space: nowrap;
+  }
+  .loop-hint .arrow {
+    display: inline-block; width: 14px; height: 1px;
+    background: var(--on-surface-muted); position: relative;
+  }
+  .loop-hint .arrow::after {
+    content: ""; position: absolute; right: 0; top: -2px;
+    width: 5px; height: 5px;
+    border-top: 1px solid var(--on-surface-muted);
+    border-right: 1px solid var(--on-surface-muted);
+    transform: rotate(45deg);
+  }
+
+  /* ============ SECTION SHELL ============ */
+  .band { padding: var(--space-8) 0; }
+  .band--tint { background: var(--surface); border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .band__head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .band__head h2 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(28px, 3vw, 38px); letter-spacing: -0.02em; margin: 0;
+    text-wrap: balance;
+  }
+  .band__head .eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--on-surface-muted); margin-bottom: 10px;
+  }
+  .band__head .more {
+    font-family: var(--font-mono); font-size: 11.5px;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--on-surface-variant); white-space: nowrap;
+    border-bottom: 1px solid var(--outline-variant); padding-bottom: 3px;
+    transition: color 160ms, border-color 160ms;
+  }
+  .band__head .more:hover { color: var(--on-surface); border-color: var(--on-surface); }
+
+  /* ============ JOURNAL ROW ============ */
+  .journal__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+  .essay {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--hairline);
+    background: var(--surface-container-lowest);
+    text-decoration: none; color: inherit;
+    transition: border-color 200ms, transform 200ms;
+  }
+  .essay:hover { border-color: var(--on-surface-variant); transform: translateY(-2px); }
+  .essay__media {
+    aspect-ratio: 16 / 9; position: relative;
+    background: repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px);
+  }
+  .essay__media--accent { background: linear-gradient(135deg, rgba(14,165,233,.10), rgba(234,87,255,.07)), repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px); }
+  .essay__media--dark { background: linear-gradient(135deg, rgba(234,87,255,.18), rgba(14,165,233,.16)), var(--inverse-surface); }
+  .essay__media .cat {
+    position: absolute; top: 12px; left: 12px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600;
+    background: rgba(255,255,255,.95); padding: 4px 8px; color: var(--on-surface);
+  }
+  .essay__media--dark .cat { background: rgba(255,255,255,.14); color: rgba(255,255,255,.92); }
+  .essay__body { padding: var(--space-3) var(--space-3) var(--space-4); display: flex; flex-direction: column; flex: 1; }
+  .essay__cat {
+    font-family: var(--font-mono); font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--primary-container); margin-bottom: 8px;
+  }
+  .essay__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 18px; line-height: 1.2; letter-spacing: -0.012em;
+    margin: 0 0 12px; text-wrap: balance;
+  }
+  .essay__meta {
+    margin-top: auto; padding-top: 12px; border-top: 1px solid var(--hairline);
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--on-surface-muted);
+    letter-spacing: 0.03em; display: flex; gap: 8px; align-items: center;
+  }
+  .essay__meta .author { color: var(--on-surface); font-weight: 600; }
+
+  /* ============ OPEN SOURCE ============ */
+  .repos { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-3); }
+  .repo {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--hairline);
+    background: var(--surface-container-lowest);
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    text-decoration: none; color: inherit;
+    transition: border-color 200ms, transform 200ms;
+    min-height: 200px;
+  }
+  .repo:hover { border-color: var(--on-surface-variant); transform: translateY(-2px); }
+  .repo__top { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: var(--on-surface-muted); }
+  .repo__top svg { width: 17px; height: 17px; }
+  .repo__top .ext { margin-left: auto; opacity: .5; }
+  .repo__name {
+    font-family: var(--font-mono); font-weight: 600; font-size: 15.5px;
+    color: var(--on-surface); letter-spacing: -0.01em;
+  }
+  .repo__name .ns { color: var(--on-surface-muted); font-weight: 400; }
+  .repo__desc { font-size: 14px; color: var(--on-surface-variant); line-height: 1.55; margin: 0; }
+  .repo__foot {
+    margin-top: auto; padding-top: var(--space-3);
+    display: flex; align-items: center; gap: 16px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+  }
+  .repo__lang { display: inline-flex; align-items: center; gap: 7px; }
+  .repo__lang .swatch { width: 9px; height: 9px; border-radius: 50%; }
+  .repo__lang--py .swatch { background: #3572A5; }
+  .repo__lang--sh .swatch { background: #89e051; }
+  .repo__lang--ts .swatch { background: #3178c6; }
+
+  @media (max-width: 900px) {
+    .hero__grid, .journal__grid, .repos { grid-template-columns: 1fr; }
+    .journal__grid { gap: var(--space-2); }
+  }
+</style>
+</head>
+<body data-screen-label="Home">
+
+<header id="site-header" data-active=""></header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="container hero__grid">
+    <div>
+      <div class="hero__eyebrow">
+        <span class="dot"></span>
+        <span class="label">An open ML journal &amp; workshop</span>
+      </div>
+      <h1 class="hero__title">
+        We&rsquo;d rather <em>show the work</em><br/>
+        than sell it.
+      </h1>
+      <p class="hero__sub">
+        MLOps.Ninja is a journal and open-source workshop on production machine
+        learning &mdash; field notes, strong opinions, and tools you can clone,
+        from the people who actually ship it.
+      </p>
+      <div class="hero__actions">
+        <a href="blog.html" class="btn btn--primary">Read the journal →</a>
+        <a href="https://github.com/mlnja" target="_blank" rel="noopener" class="btn btn--ghost">
+          <svg class="gh" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/></svg>
+          Open source
+        </a>
+      </div>
+      <div class="hero__sig">
+        <div class="hero__sig-item">
+          <span class="k">Format</span>
+          <span class="v">Essays &amp; open source</span>
+        </div>
+        <div class="hero__sig-item">
+          <span class="k">No</span>
+          <span class="v">Pitch decks or funnels</span>
+        </div>
+        <div class="hero__sig-item">
+          <span class="k">Writing since</span>
+          <span class="v">2021</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Infinity loop — the brand signature, segments link into the journal -->
+    <div class="loop-stage">
+      <svg class="loop-svg" viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg">
+        <a href="blog.html?cat=eda" aria-label="EDA essays">
+          <path class="seg" d="M180.2,75.6c47.4,5.4,84.2,45.6,84.2,94.4c0-38.8,13.3-74.6,35.6-102.9C271.6,31.1,228.7,7.2,180.2,4l-13.9,35.8L180.2,75.6z" fill="#7dd3fc"/>
+          <text class="seg-label" x="247" y="64" text-anchor="middle" dominant-baseline="central" transform="rotate(38 247 64)">EDA</text>
+        </a>
+        <a href="blog.html?cat=data-prep" aria-label="Data Prep essays">
+          <path class="seg" d="M74.7,161.1c4.5-48.3,45.1-86.2,94.6-86.2c1.2,0,2.3,0,3.5,0.1l-13.7-35.2l14-36.1c-1.3,0-2.6,0-3.8,0C80.5,3.7,7.9,73.3,3.2,161l35.9,13.9L74.7,161.1z" fill="#38bdf8"/>
+          <text class="seg-label" x="76" y="76" text-anchor="middle" dominant-baseline="central" transform="rotate(-44 76 76)">DATA PREP</text>
+        </a>
+        <a href="blog.html?cat=develop" aria-label="Develop essays">
+          <path class="seg" d="M159.3,264.5c-47.8-5-85-45.4-85-94.5c0-0.5,0-1.1,0-1.6l-35.2,13.7L3,168.1c0,0.6,0,1.3,0,1.9c0,88.6,69.3,161,156.6,166l13.7-35.4L159.3,264.5z" fill="#0ea5e9"/>
+          <text class="seg-label" x="78" y="265" text-anchor="middle" dominant-baseline="central" transform="rotate(45 78 265)">DEVELOP</text>
+        </a>
+        <a href="blog.html?cat=retrain" aria-label="Retrain essays">
+          <path class="seg" d="M335.3,180.5L300.5,167l-34,13.2l0,0l-0.5,0.2l-1.3,0.5c0,0,0,0,0,0.1c0,0,0,0,0,0l-1,0.4c-5.6,47.2-45.7,83.8-94.4,83.8c-0.9,0-1.8,0-2.7,0l13.8,35.7l-13.8,35.6c0.9,0,1.8,0,2.7,0c53,0,100.2-24.8,130.7-63.4c0,0,0-0.1,0-0.1C320.3,247.1,333.1,215.2,335.3,180.5z" fill="#0284c7"/>
+          <text class="seg-label" x="256" y="272" text-anchor="middle" dominant-baseline="central" transform="rotate(-32 256 272)">(RE)TRAIN</text>
+        </a>
+        <a href="blog.html?cat=review" aria-label="Review essays">
+          <path class="seg" d="M458.8,6.1c-9.2-1.6-18.6-2.4-28.1-2.4c-53,0-100.2,24.8-130.7,63.4c-22.3,28.3-35.6,64-35.6,102.9c0,1.3,0,2.6,0,3.8l36.1-14l35.1,13.6c0-1.2,0-2.3,0-3.5c0-52.5,42.6-95,95-95c4.3,0,8.5,0.3,12.7,0.8l21.1-31.3L458.8,6.1z" fill="#f0abfc"/>
+          <text class="seg-label" x="351" y="64" text-anchor="middle" dominant-baseline="central" transform="rotate(-40 351 64)">REVIEW</text>
+        </a>
+        <a href="blog.html?cat=deploy" aria-label="Deploy essays">
+          <path class="seg" d="M594.5,198.8c1.6-9.4,2.5-19,2.5-28.8c0-79.8-56.2-146.5-131.3-162.6l5.7,38.7l-20.9,31c43,9.1,75.2,47.3,75.2,93c0,4.2-0.3,8.4-0.8,12.5l32.2,21.8L594.5,198.8z" fill="#ea57ff"/>
+          <text class="seg-label" x="533" y="92" text-anchor="middle" dominant-baseline="central" transform="rotate(58 533 92)">DEPLOY</text>
+        </a>
+        <a href="blog.html?cat=inference" aria-label="Inference essays">
+          <path class="seg" d="M523.7,189.7c-9.1,43-47.3,75.4-93,75.4c-4.2,0-8.3-0.3-12.4-0.8L396.4,297l5.6,36.9c9.3,1.6,18.9,2.5,28.7,2.5c79.6,0,146.1-55.9,162.5-130.6l-37.6,5.5L523.7,189.7z" fill="#c026d3"/>
+          <text class="seg-label" x="508" y="276" text-anchor="middle" dominant-baseline="central" transform="rotate(-34 508 276)">INFERENCE</text>
+        </a>
+        <a href="blog.html?cat=monitor" aria-label="Monitor essays">
+          <path class="seg" d="M411.1,263c-39.7-8.3-70.2-41.3-74.9-82.2l-0.9-0.4c-2.2,34.8-15,66.7-35.3,92.4c23.4,29.7,56.8,51.2,95,59.6l-5.6-37.1L411.1,263z" fill="#a21caf"/>
+          <text class="seg-label" x="343" y="266" text-anchor="middle" dominant-baseline="central" transform="rotate(41 343 266)">MONITOR</text>
+        </a>
+        <a href="blog.html?cat=ml" aria-label="All ML essays">
+          <text class="big-label" x="169" y="170" text-anchor="middle" dominant-baseline="central">ML</text>
+        </a>
+        <a href="blog.html?cat=ops" aria-label="All Ops essays">
+          <text class="big-label" x="430" y="170" text-anchor="middle" dominant-baseline="central">OPS</text>
+        </a>
+      </svg>
+      <div class="loop-hint">
+        <span class="arrow"></span>
+        <span>Pick a direction — every node is a column in the journal</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FROM THE JOURNAL ============ -->
+<section class="band">
+  <div class="container">
+    <div class="band__head">
+      <div>
+        <div class="eyebrow">From the journal</div>
+        <h2>Field notes on shipping ML.</h2>
+      </div>
+      <a class="more" href="blog.html">All posts →</a>
+    </div>
+    <div class="journal__grid">
+
+      <a class="essay" href="#">
+        <div class="essay__media essay__media--dark"><span class="cat">Deploy</span></div>
+        <div class="essay__body">
+          <div class="essay__cat">Deploy · Inference</div>
+          <h3 class="essay__title">Triton, vLLM, or just FastAPI? A decision framework.</h3>
+          <div class="essay__meta"><span class="author">Dmitry Rubinstein</span><span>· May 18, 2025</span></div>
+        </div>
+      </a>
+
+      <a class="essay" href="#">
+        <div class="essay__media"><span class="cat">Monitor</span></div>
+        <div class="essay__body">
+          <div class="essay__cat">Monitor · Drift</div>
+          <h3 class="essay__title">Drift metrics that aren&rsquo;t KL divergence.</h3>
+          <div class="essay__meta"><span class="author">Ilya Dvorkin</span><span>· May 04, 2025</span></div>
+        </div>
+      </a>
+
+      <a class="essay" href="#">
+        <div class="essay__media essay__media--accent"><span class="cat">Develop</span></div>
+        <div class="essay__body">
+          <div class="essay__cat">Develop · Experimentation</div>
+          <h3 class="essay__title">Stop tracking experiments in your notebook filename.</h3>
+          <div class="essay__meta"><span class="author">Ilya Dvorkin</span><span>· Apr 22, 2025</span></div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ IN THE OPEN ============ -->
+<section class="band band--tint">
+  <div class="container">
+    <div class="band__head">
+      <div>
+        <div class="eyebrow">In the open</div>
+        <h2>Tools we built because we needed them.</h2>
+      </div>
+      <a class="more" href="https://github.com/mlnja" target="_blank" rel="noopener">github.com/mlnja →</a>
+    </div>
+    <div class="repos">
+
+      <a class="repo" href="https://github.com/mlnja" target="_blank" rel="noopener">
+        <div class="repo__top">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/></svg>
+          <span class="ext">↗</span>
+        </div>
+        <div class="repo__name"><span class="ns">mlnja/</span>driftwatch</div>
+        <p class="repo__desc">Concept- and data-drift monitoring that emits the three metrics we actually alert on — not a dashboard you'll ignore.</p>
+        <div class="repo__foot">
+          <span class="repo__lang repo__lang--py"><span class="swatch"></span>Python</span>
+          <span>MIT</span>
+        </div>
+      </a>
+
+      <a class="repo" href="https://github.com/mlnja" target="_blank" rel="noopener">
+        <div class="repo__top">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/></svg>
+          <span class="ext">↗</span>
+        </div>
+        <div class="repo__name"><span class="ns">mlnja/</span>lean-ml-docker</div>
+        <p class="repo__desc">Opinionated, four-line Dockerfiles for serving models. No venv, no 4 GB images, no cargo-culting. The post that started it lives in the journal.</p>
+        <div class="repo__foot">
+          <span class="repo__lang repo__lang--sh"><span class="swatch"></span>Dockerfile</span>
+          <span>MIT</span>
+        </div>
+      </a>
+
+      <a class="repo" href="https://github.com/mlnja" target="_blank" rel="noopener">
+        <div class="repo__top">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/></svg>
+          <span class="ext">↗</span>
+        </div>
+        <div class="repo__name"><span class="ns">mlnja/</span>notebook-to-prod</div>
+        <p class="repo__desc">A scaffold + checklist that turns a research notebook into a served, monitored endpoint — the boring path we walk on every project.</p>
+        <div class="repo__foot">
+          <span class="repo__lang repo__lang--py"><span class="swatch"></span>Python</span>
+          <span>Apache-2.0</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+<script src="chrome.js"></script>
+
+</body>
+</html>

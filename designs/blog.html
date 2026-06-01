@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blog · MLOps.Ninja</title>
+<link rel="stylesheet" href="styles/tokens.css" />
+<style>
+  body { background: var(--surface-container-lowest); }
+
+  /* ============ HERO ============ */
+  .blog-hero {
+    padding: var(--space-8) 0 var(--space-7);
+    border-bottom: 1px solid var(--hairline);
+    position: relative;
+    overflow: hidden;
+  }
+  .blog-hero::before {
+    content: "";
+    position: absolute; top: -30%; right: -8%;
+    width: 60%; height: 160%;
+    background:
+      radial-gradient(ellipse at 60% 40%, rgba(234,87,255,.05) 0%, transparent 55%),
+      radial-gradient(ellipse at 30% 60%, rgba(14,165,233,.06) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .blog-hero__inner {
+    display: grid;
+    grid-template-columns: minmax(320px, .9fr) minmax(440px, 1.1fr);
+    gap: var(--space-7);
+    align-items: center;
+    position: relative;
+  }
+  .blog-hero__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: var(--space-3);
+    display: inline-flex; align-items: center; gap: 10px;
+    white-space: nowrap;
+  }
+  .blog-hero__eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--secondary-container);
+    box-shadow: 0 0 0 4px rgba(234,87,255,.15);
+  }
+  .blog-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(44px, 5.4vw, 76px);
+    line-height: 0.96;
+    letter-spacing: -0.03em;
+    margin: 0 0 var(--space-3);
+    text-wrap: balance;
+  }
+  .blog-hero h1 em {
+    font-style: normal;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .blog-hero p {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--on-surface-variant);
+    margin: 0 0 var(--space-4);
+    max-width: 420px;
+    text-wrap: pretty;
+  }
+
+  /* ---- Filter readout (replaces the chip bar) ---- */
+  .filter-readout {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--font-mono); font-size: 12px;
+    letter-spacing: 0.04em; color: var(--on-surface-variant);
+    padding-top: var(--space-3); border-top: 1px solid var(--hairline);
+  }
+  .filter-readout .now { color: var(--on-surface); font-weight: 600; }
+  .filter-readout .clear {
+    display: none;
+    background: var(--on-surface); color: #fff; border: 0;
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 6px 10px; cursor: pointer;
+  }
+  .filter-readout .clear:hover { background: var(--primary); }
+  .filter-readout.is-filtered .clear { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* ---- Interactive loop ---- */
+  .loop-stage { position: relative; width: 100%; aspect-ratio: 600 / 340; max-width: 680px; margin-left: auto; }
+  .loop-stage::before {
+    content: ""; position: absolute; inset: -8%;
+    background:
+      radial-gradient(ellipse 46% 60% at 28% 50%, rgba(14,165,233,.12) 0%, transparent 70%),
+      radial-gradient(ellipse 46% 60% at 72% 50%, rgba(234,87,255,.12) 0%, transparent 70%);
+    filter: blur(26px); pointer-events: none;
+  }
+  .loop-svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+  .seg-link { cursor: pointer; }
+  .seg { transition: filter 200ms ease, opacity 240ms ease; }
+  .seg-link:hover .seg { filter: brightness(1.08) saturate(1.06); }
+  .seg-link:focus { outline: none; }
+  .seg-link:focus-visible .seg { outline: 2px solid var(--primary-container); }
+  .seg-link.is-dim .seg { opacity: 0.16; }
+  .seg-link.is-dim .seg-label { opacity: 0.22; }
+  .seg-link.is-active .seg { filter: brightness(1.12) saturate(1.1) drop-shadow(0 4px 14px rgba(0,0,0,.18)); }
+  .seg-label {
+    font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+    letter-spacing: 0.1em; fill: #ffffff; pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.28); transition: opacity 240ms ease;
+  }
+  .big-label {
+    font-family: var(--font-display); font-weight: 700; font-size: 46px;
+    letter-spacing: 0.01em; fill: var(--on-surface); cursor: pointer;
+    transition: fill 200ms, letter-spacing 200ms, opacity 240ms;
+  }
+  .seg-link:hover .big-label { letter-spacing: 0.04em; }
+  .seg-link[data-cat="ml"]:hover .big-label,
+  .seg-link[data-cat="ml"].is-active .big-label { fill: #0ea5e9; }
+  .seg-link[data-cat="ops"]:hover .big-label,
+  .seg-link[data-cat="ops"].is-active .big-label { fill: var(--secondary); }
+  .seg-link.is-dim .big-label { opacity: 0.2; }
+  .loop-hint {
+    position: absolute; pointer-events: none; left: 50%; bottom: -40px;
+    transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--on-surface-muted);
+    display: flex; align-items: center; gap: 10px; white-space: nowrap;
+  }
+  .loop-hint .arrow { display: inline-block; width: 14px; height: 1px; background: var(--on-surface-muted); position: relative; }
+  .loop-hint .arrow::after { content: ""; position: absolute; right: 0; top: -2px; width: 5px; height: 5px; border-top: 1px solid var(--on-surface-muted); border-right: 1px solid var(--on-surface-muted); transform: rotate(45deg); }
+
+  /* ============ FEATURED ============ */
+  .featured {
+    padding: var(--space-7) 0;
+  }
+  .featured__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--space-1);
+    border: 1px solid var(--hairline);
+  }
+  .featured__media {
+    position: relative;
+    align-self: start;
+    aspect-ratio: 4 / 3;
+    background:
+      linear-gradient(135deg, rgba(14,165,233,.10) 0%, rgba(234,87,255,.08) 100%),
+      repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .featured__media .placeholder {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .featured__media .placeholder svg { opacity: .35; }
+  .featured__media .label {
+    position: absolute; top: 16px; left: 16px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    background: rgba(255,255,255,.95);
+    padding: 6px 10px;
+    color: var(--on-surface);
+  }
+  .featured__media .label em { font-style: normal; color: var(--primary-container); margin-left: 6px; }
+  .featured__body {
+    padding: var(--space-5);
+    display: flex; flex-direction: column;
+    background: var(--surface-container-lowest);
+    border-left: 1px solid var(--hairline);
+  }
+  .featured__cat {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--primary-container);
+    margin-bottom: var(--space-3);
+  }
+  .featured__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 38px;
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-3);
+    text-wrap: balance;
+  }
+  .featured__title a { color: inherit; text-decoration: none; }
+  .featured__title a:hover { color: var(--primary); }
+  .featured__excerpt {
+    font-size: 16px;
+    color: var(--on-surface-variant);
+    line-height: 1.6;
+    margin: 0 0 var(--space-4);
+  }
+  .featured__meta {
+    margin-top: auto;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--hairline);
+    display: flex; align-items: center; gap: var(--space-3);
+    font-family: var(--font-mono); font-size: 12px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+  }
+  .featured__meta .author { color: var(--on-surface); font-weight: 600; }
+  .featured__meta .read {
+    margin-left: auto;
+    color: var(--on-surface); font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .featured__meta .read::after {
+    content: "→";
+    font-family: var(--font-body);
+  }
+
+  /* ============ POST GRID ============ */
+  .posts {
+    padding: 0 0 var(--space-8);
+  }
+  .posts__head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .posts__head h2 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 28px; letter-spacing: -0.015em;
+    margin: 0;
+  }
+  .posts__head span {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+  .posts__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+  .post {
+    display: flex; flex-direction: column;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    text-decoration: none; color: inherit;
+    transition: border-color 200ms, transform 200ms;
+  }
+  .post:hover { border-color: var(--on-surface-variant); transform: translateY(-2px); }
+  .post__media {
+    aspect-ratio: 4 / 3;
+    background:
+      repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px);
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 10.5px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .post__media--accent {
+    background:
+      linear-gradient(135deg, rgba(14,165,233,.10), rgba(234,87,255,.07)),
+      repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px);
+  }
+  .post__media--dark {
+    background:
+      linear-gradient(135deg, rgba(234,87,255,.18), rgba(14,165,233,.16)),
+      var(--inverse-surface);
+    color: rgba(255,255,255,.7);
+  }
+  .post__media .cat {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(255,255,255,.95);
+    padding: 4px 8px;
+    color: var(--on-surface);
+    font-weight: 600;
+  }
+  .post__media--dark .cat { background: rgba(255,255,255,.12); color: rgba(255,255,255,.9); }
+  .post__body {
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    display: flex; flex-direction: column; flex: 1;
+  }
+  .post__cat {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--primary-container);
+    margin-bottom: 10px;
+  }
+  .post__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 19px;
+    line-height: 1.2;
+    letter-spacing: -0.012em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .post__excerpt {
+    font-size: 14px;
+    color: var(--on-surface-variant);
+    line-height: 1.55;
+    margin: 0 0 var(--space-3);
+  }
+  .post__meta {
+    margin-top: auto;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+    display: flex; gap: 10px; align-items: center;
+  }
+  .post__meta .author { color: var(--on-surface); font-weight: 600; }
+
+  /* ============ SUBSCRIBE ============ */
+  .subscribe {
+    border-top: 1px solid var(--hairline);
+    background: var(--surface);
+    padding: var(--space-8) 0;
+  }
+  .subscribe__inner {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--space-7);
+    align-items: center;
+  }
+  .subscribe h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(32px, 4vw, 48px);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-2);
+    text-wrap: balance;
+  }
+  .subscribe p {
+    font-size: 16px;
+    color: var(--on-surface-variant);
+    line-height: 1.55;
+    margin: 0;
+    max-width: 540px;
+  }
+  .subscribe form {
+    display: flex; gap: 8px;
+  }
+  .subscribe input {
+    flex: 1;
+    padding: 16px 18px;
+    border: 1px solid var(--hairline);
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--on-surface);
+    border-radius: var(--radius-sm);
+  }
+  .subscribe input:focus { outline: none; border-color: var(--primary-container); box-shadow: 0 0 0 4px rgba(14,165,233,.12); }
+  .subscribe button {
+    padding: 16px 22px;
+    background: var(--on-surface);
+    color: #fff;
+    border: 0;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .subscribe button:hover { background: var(--primary); }
+  .subscribe__note {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--on-surface-muted);
+    margin-top: 12px;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 900px) {
+    .blog-hero__inner { grid-template-columns: 1fr; }
+    .blog-hero p { max-width: none; }
+    .loop-stage { margin: var(--space-5) auto 0; }
+    .posts__grid { grid-template-columns: 1fr 1fr; }
+    .featured__inner { grid-template-columns: 1fr; }
+    .featured__media { aspect-ratio: 16 / 9; }
+    .featured__body { border-left: 0; border-top: 1px solid var(--hairline); }
+    .subscribe__inner { grid-template-columns: 1fr; gap: var(--space-4); }
+  }
+  @media (max-width: 600px) {
+    .posts__grid { grid-template-columns: 1fr; }
+    .subscribe form { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body data-screen-label="Blog">
+
+<header id="site-header" data-active="blog"></header>
+
+<!-- HERO -->
+<section class="blog-hero">
+  <div class="container blog-hero__inner">
+    <div>
+      <div class="blog-hero__eyebrow"><span class="dot"></span><span>The journal</span></div>
+      <h1>Field notes on <em>shipping ML</em>.</h1>
+      <p>Short, opinionated posts on what&rsquo;s actually working in production right now — sorted along the lifecycle we live in. Click any node to filter.</p>
+      <div class="filter-readout" id="readout">
+        <span>Showing&nbsp; <span class="now" id="readoutNow">everything</span></span>
+        <button class="clear" id="clearFilter">✕ Clear</button>
+      </div>
+    </div>
+
+    <div class="loop-stage">
+      <svg class="loop-svg" viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg">
+        <g class="seg-link" data-cat="eda" role="button" tabindex="0" aria-label="Filter: EDA">
+          <path class="seg" d="M180.2,75.6c47.4,5.4,84.2,45.6,84.2,94.4c0-38.8,13.3-74.6,35.6-102.9C271.6,31.1,228.7,7.2,180.2,4l-13.9,35.8L180.2,75.6z" fill="#7dd3fc"/>
+          <text class="seg-label" x="247" y="64" text-anchor="middle" dominant-baseline="central" transform="rotate(38 247 64)">EDA</text>
+        </g>
+        <g class="seg-link" data-cat="data-prep" role="button" tabindex="0" aria-label="Filter: Data Prep">
+          <path class="seg" d="M74.7,161.1c4.5-48.3,45.1-86.2,94.6-86.2c1.2,0,2.3,0,3.5,0.1l-13.7-35.2l14-36.1c-1.3,0-2.6,0-3.8,0C80.5,3.7,7.9,73.3,3.2,161l35.9,13.9L74.7,161.1z" fill="#38bdf8"/>
+          <text class="seg-label" x="76" y="76" text-anchor="middle" dominant-baseline="central" transform="rotate(-44 76 76)">DATA PREP</text>
+        </g>
+        <g class="seg-link" data-cat="develop" role="button" tabindex="0" aria-label="Filter: Develop">
+          <path class="seg" d="M159.3,264.5c-47.8-5-85-45.4-85-94.5c0-0.5,0-1.1,0-1.6l-35.2,13.7L3,168.1c0,0.6,0,1.3,0,1.9c0,88.6,69.3,161,156.6,166l13.7-35.4L159.3,264.5z" fill="#0ea5e9"/>
+          <text class="seg-label" x="78" y="265" text-anchor="middle" dominant-baseline="central" transform="rotate(45 78 265)">DEVELOP</text>
+        </g>
+        <g class="seg-link" data-cat="retrain" role="button" tabindex="0" aria-label="Filter: Retrain">
+          <path class="seg" d="M335.3,180.5L300.5,167l-34,13.2l0,0l-0.5,0.2l-1.3,0.5c0,0,0,0,0,0.1c0,0,0,0,0,0l-1,0.4c-5.6,47.2-45.7,83.8-94.4,83.8c-0.9,0-1.8,0-2.7,0l13.8,35.7l-13.8,35.6c0.9,0,1.8,0,2.7,0c53,0,100.2-24.8,130.7-63.4c0,0,0-0.1,0-0.1C320.3,247.1,333.1,215.2,335.3,180.5z" fill="#0284c7"/>
+          <text class="seg-label" x="256" y="272" text-anchor="middle" dominant-baseline="central" transform="rotate(-32 256 272)">(RE)TRAIN</text>
+        </g>
+        <g class="seg-link" data-cat="review" role="button" tabindex="0" aria-label="Filter: Review">
+          <path class="seg" d="M458.8,6.1c-9.2-1.6-18.6-2.4-28.1-2.4c-53,0-100.2,24.8-130.7,63.4c-22.3,28.3-35.6,64-35.6,102.9c0,1.3,0,2.6,0,3.8l36.1-14l35.1,13.6c0-1.2,0-2.3,0-3.5c0-52.5,42.6-95,95-95c4.3,0,8.5,0.3,12.7,0.8l21.1-31.3L458.8,6.1z" fill="#f0abfc"/>
+          <text class="seg-label" x="351" y="64" text-anchor="middle" dominant-baseline="central" transform="rotate(-40 351 64)">REVIEW</text>
+        </g>
+        <g class="seg-link" data-cat="deploy" role="button" tabindex="0" aria-label="Filter: Deploy">
+          <path class="seg" d="M594.5,198.8c1.6-9.4,2.5-19,2.5-28.8c0-79.8-56.2-146.5-131.3-162.6l5.7,38.7l-20.9,31c43,9.1,75.2,47.3,75.2,93c0,4.2-0.3,8.4-0.8,12.5l32.2,21.8L594.5,198.8z" fill="#ea57ff"/>
+          <text class="seg-label" x="533" y="92" text-anchor="middle" dominant-baseline="central" transform="rotate(58 533 92)">DEPLOY</text>
+        </g>
+        <g class="seg-link" data-cat="inference" role="button" tabindex="0" aria-label="Filter: Inference">
+          <path class="seg" d="M523.7,189.7c-9.1,43-47.3,75.4-93,75.4c-4.2,0-8.3-0.3-12.4-0.8L396.4,297l5.6,36.9c9.3,1.6,18.9,2.5,28.7,2.5c79.6,0,146.1-55.9,162.5-130.6l-37.6,5.5L523.7,189.7z" fill="#c026d3"/>
+          <text class="seg-label" x="508" y="276" text-anchor="middle" dominant-baseline="central" transform="rotate(-34 508 276)">INFERENCE</text>
+        </g>
+        <g class="seg-link" data-cat="monitor" role="button" tabindex="0" aria-label="Filter: Monitor">
+          <path class="seg" d="M411.1,263c-39.7-8.3-70.2-41.3-74.9-82.2l-0.9-0.4c-2.2,34.8-15,66.7-35.3,92.4c23.4,29.7,56.8,51.2,95,59.6l-5.6-37.1L411.1,263z" fill="#a21caf"/>
+          <text class="seg-label" x="343" y="266" text-anchor="middle" dominant-baseline="central" transform="rotate(41 343 266)">MONITOR</text>
+        </g>
+        <g class="seg-link" data-cat="ml" role="button" tabindex="0" aria-label="Filter: all ML topics">
+          <text class="big-label" x="169" y="170" text-anchor="middle" dominant-baseline="central">ML</text>
+        </g>
+        <g class="seg-link" data-cat="ops" role="button" tabindex="0" aria-label="Filter: all Ops topics">
+          <text class="big-label" x="430" y="170" text-anchor="middle" dominant-baseline="central">OPS</text>
+        </g>
+      </svg>
+      <div class="loop-hint" id="loopHint">
+        <span class="arrow"></span>
+        <span>Click any node to filter the journal</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED -->
+<section class="featured">
+  <div class="container">
+    <div class="featured__inner">
+      <div class="featured__media">
+        <span class="label">Featured <em>· Latest</em></span>
+        <div class="placeholder">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 12c0-4 4-8 9-8 7 0 9 4 9 8s-2 8-9 8c-5 0-9-4-9-8Z"/><path d="M9 9v6l5-3z" fill="currentColor" stroke="none"/></svg>
+          <span>[ blog hero image ]</span>
+        </div>
+      </div>
+      <div class="featured__body">
+        <div class="featured__cat">Deploy · Containers</div>
+        <h2 class="featured__title">
+          <a href="blog/you-dont-need-venv-in-docker.html">You don't need <code style="font-family: var(--font-mono); background: var(--surface-container); padding: 2px 8px; font-size: 0.85em;">venv</code> in Docker.</a>
+        </h2>
+        <p class="featured__excerpt">
+          If your Dockerfile starts with <code style="font-family: var(--font-mono); font-size: 13px;">python -m venv</code>, you've already taken a wrong turn. A short, blunt argument for why the container <em>is</em> the environment — and the four-line Dockerfile that proves it.
+        </p>
+        <div class="featured__meta">
+          <span class="author">Dmitry Rubinstein</span>
+          <span>· Jun 12, 2025</span>
+          <span>· 7 min read</span>
+          <a href="blog/you-dont-need-venv-in-docker.html" class="read" style="text-decoration: none; color: var(--on-surface);">Read post</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POSTS -->
+<section class="posts">
+  <div class="container">
+    <div class="posts__head">
+      <h2>Recent posts</h2>
+      <span>12 posts · ordered by date</span>
+    </div>
+
+    <div class="posts__grid">
+
+      <a class="post" data-cat="develop" href="#">
+        <div class="post__media post__media--accent">
+          <span class="cat">Develop</span>
+          <span>[ post image ]</span>
+        </div>
+        <div class="post__body">
+          <div class="post__cat">Develop · Experimentation</div>
+          <h3 class="post__title">Stop tracking experiments in your notebook filename.</h3>
+          <p class="post__excerpt">A pragmatic guide to picking an experiment tracker that you'll actually keep using past week three.</p>
+          <div class="post__meta"><span class="author">Ilya Dvorkin</span><span>· May 28, 2025</span></div>
+        </div>
+      </a>
+
+      <a class="post" data-cat="deploy" href="#">
+        <div class="post__media post__media--dark">
+          <span class="cat">Deploy</span>
+          <span>[ post image ]</span>
+        </div>
+        <div class="post__body">
+          <div class="post__cat">Deploy · Inference</div>
+          <h3 class="post__title">Triton, vLLM, or just FastAPI? A decision framework.</h3>
+          <p class="post__excerpt">When you actually need a real inference server, when FastAPI is fine, and the three questions to ask first.</p>
+          <div class="post__meta"><span class="author">Dmitry Rubinstein</span><span>· May 18, 2025</span></div>
+        </div>
+      </a>
+
+      <a class="post" data-cat="monitor" href="#">
+        <div class="post__media">
+          <span class="cat">Monitor</span>
+          <span>[ post image ]</span>
+        </div>
+        <div class="post__body">
+          <div class="post__cat">Monitor · Drift</div>
+          <h3 class="post__title">Drift metrics that aren't KL divergence.</h3>
+          <p class="post__excerpt">KL is everywhere because it's first in the textbook. Here's what we actually alert on in production.</p>
+          <div class="post__meta"><span class="author">Ilya Dvorkin</span><span>· May 04, 2025</span></div>
+        </div>
+      </a>
+
+      <a class="post" data-cat="eda" href="#">
+        <div class="post__media post__media--accent">
+          <span class="cat">EDA</span>
+          <span>[ post image ]</span>
+        </div>
+        <div class="post__body">
+          <div class="post__cat">EDA · Tooling</div>
+          <h3 class="post__title">Three pandas one-liners that catch 80% of dataset bugs.</h3>
+          <p class="post__excerpt">The cheap checks we run before opening a notebook on any new dataset. Mostly unglamorous, all worth it.</p>
+          <div class="post__meta"><span class="author">Dmitry Rubinstein</span><span>· Apr 22, 2025</span></div>
+        </div>
+      </a>
+
+      <a class="post" data-cat="develop" href="#">
+        <div class="post__media">
+          <span class="cat">Develop</span>
+          <span>[ post image ]</span>
+        </div>
+        <div class="post__body">
+          <div class="post__cat">Develop · Training</div>
+          <h3 class="post__title">Stop checkpointing every epoch. Use validation, not vibes.</h3>
+          <p class="post__excerpt">A short defence of opinionated checkpointing — and the disk-cost math that backs it up.</p>
+          <div class="post__meta"><span class="author">Dmitry Rubinstein</span><span>· Apr 09, 2025</span></div>
+        </div>
+      </a>
+
+      <a class="post" data-cat="retrain" href="#">
+        <div class="post__media post__media--dark">
+          <span class="cat">Retrain</span>
+          <span>[ post image ]</span>
+        </div>
+        <div class="post__body">
+          <div class="post__cat">Retrain · Automation</div>
+          <h3 class="post__title">"Retraining cadence" is a smell. Trigger on data, not the calendar.</h3>
+          <p class="post__excerpt">Why scheduled retraining is the most common form of organised waste — and how we replace it.</p>
+          <div class="post__meta"><span class="author">Ilya Dvorkin</span><span>· Mar 27, 2025</span></div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- SUBSCRIBE -->
+<section class="subscribe">
+  <div class="container subscribe__inner">
+    <div>
+      <h2>Get the next field note in your inbox.</h2>
+      <p>One short post every two weeks, written by the team. No marketing copy, no AI summaries, no "10 ways to leverage." Unsubscribe is one click.</p>
+    </div>
+    <div>
+      <form onsubmit="event.preventDefault(); this.querySelector('button').textContent='Subscribed ✓';">
+        <input type="email" placeholder="your@email.com" required />
+        <button type="submit">Subscribe</button>
+      </form>
+      <div class="subscribe__note">~ 600 readers · last sent May 28, 2025</div>
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+<script src="chrome.js"></script>
+
+<script>
+  // Category groups for the ML / OPS nodes on the loop
+  const GROUPS = {
+    ml:  ['eda', 'data-prep', 'develop', 'retrain'],
+    ops: ['review', 'deploy', 'inference', 'monitor'],
+  };
+  const LABELS = {
+    all: 'everything', eda: 'EDA', 'data-prep': 'Data Prep', develop: 'Develop',
+    retrain: 'Retrain', review: 'Review', deploy: 'Deploy',
+    inference: 'Inference', monitor: 'Monitor', ml: 'the ML side', ops: 'the Ops side',
+  };
+
+  const posts    = [...document.querySelectorAll('.post')];
+  const segs     = [...document.querySelectorAll('.seg-link')];
+  const featured = document.querySelector('.featured');
+  const title    = document.querySelector('.posts__head h2');
+  const countEl  = document.querySelector('.posts__head span');
+  const readout  = document.getElementById('readout');
+  const readoutNow = document.getElementById('readoutNow');
+  const loopHint = document.getElementById('loopHint');
+
+  function apply(cat) {
+    const set = GROUPS[cat] || (cat === 'all' ? null : [cat]);
+    let shown = 0;
+    posts.forEach(p => {
+      const match = !set || set.includes(p.dataset.cat);
+      p.style.display = match ? '' : 'none';
+      if (match) shown++;
+    });
+
+    // featured post is a Deploy piece — only show under all / ops / deploy
+    const featOk = !set || set.includes('deploy');
+    if (featured) featured.style.display = featOk ? '' : 'none';
+
+    // loop highlight: dim non-matching segments, mark the active one
+    segs.forEach(s => {
+      const c = s.dataset.cat;
+      const inFilter = !set || set.includes(c) || c === cat;
+      s.classList.toggle('is-dim', !!set && !inFilter);
+      s.classList.toggle('is-active', set && (c === cat));
+    });
+
+    // readout
+    readoutNow.textContent = LABELS[cat] || 'everything';
+    readout.classList.toggle('is-filtered', cat !== 'all');
+    if (loopHint) loopHint.style.opacity = cat === 'all' ? '' : '0';
+
+    title.textContent = cat === 'all' ? 'Recent posts' : (LABELS[cat] || 'Posts');
+    countEl.textContent = `${shown} post${shown === 1 ? '' : 's'}` +
+      (cat === 'all' ? ' · newest first' : ' · filtered');
+  }
+
+  function setCat(cat) {
+    apply(cat);
+    const url = new URL(location);
+    if (cat === 'all') url.searchParams.delete('cat'); else url.searchParams.set('cat', cat);
+    history.replaceState(null, '', url);
+  }
+
+  segs.forEach(s => {
+    s.addEventListener('click', () => {
+      // clicking the already-active node clears the filter
+      const next = s.classList.contains('is-active') ? 'all' : s.dataset.cat;
+      setCat(next);
+    });
+    s.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); s.click(); }
+    });
+  });
+
+  document.getElementById('clearFilter').addEventListener('click', () => setCat('all'));
+
+  // Honour ?cat= from the landing-page loop
+  const initial = new URLSearchParams(location.search).get('cat');
+  if (initial && LABELS[initial]) apply(initial);
+</script>
+
+</body>
+</html>

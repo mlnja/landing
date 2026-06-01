@@ -1,0 +1,443 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const sortedPosts = allPosts.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+
+// Get category from URL params
+const searchParams = Astro.url.searchParams;
+const categoryFilter = searchParams.get('cat');
+
+const filteredPosts = categoryFilter
+  ? sortedPosts.filter(post => post.data.category === categoryFilter)
+  : sortedPosts;
+---
+
+<Layout title="Blog · MLOps.Ninja" active="blog">
+  <!-- Blog Hero -->
+  <section class="blog-hero">
+    <div class="container blog-hero__inner">
+      <div>
+        <div class="blog-hero__eyebrow">
+          <span class="dot"></span>
+          <span>Field notes from production</span>
+        </div>
+        <h1>
+          Essays on <em>real ML systems</em>.
+        </h1>
+        <p>
+          No fluff, no hype — just practical field notes from people who build,
+          ship, and maintain production machine learning.
+        </p>
+        <div class="filter-readout" id="readout">
+          <span>Showing&nbsp; <span class="now" id="readoutNow">everything</span></span>
+          <button class="clear" id="clearFilter">✕ Clear</button>
+        </div>
+      </div>
+
+      <!-- Loop stage (same as homepage) -->
+      <div class="loop-stage">
+        <svg class="loop-svg" viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg">
+          <a href="/blog?cat=eda" class={`seg-link ${categoryFilter === 'eda' ? 'is-active' : categoryFilter ? 'is-dim' : ''}`} data-cat="eda" aria-label="EDA essays">
+            <path class="seg" d="M180.2,75.6c47.4,5.4,84.2,45.6,84.2,94.4c0-38.8,13.3-74.6,35.6-102.9C271.6,31.1,228.7,7.2,180.2,4l-13.9,35.8L180.2,75.6z" fill="#7dd3fc"/>
+            <text class="seg-label" x="247" y="64" text-anchor="middle" dominant-baseline="central" transform="rotate(38 247 64)">EDA</text>
+          </a>
+          <a href="/blog?cat=data-prep" class={`seg-link ${categoryFilter === 'data-prep' ? 'is-active' : categoryFilter ? 'is-dim' : ''}`} data-cat="data-prep" aria-label="Data Prep essays">
+            <path class="seg" d="M74.7,161.1c4.5-48.3,45.1-86.2,94.6-86.2c1.2,0,2.3,0,3.5,0.1l-13.7-35.2l14-36.1c-1.3,0-2.6,0-3.8,0C80.5,3.7,7.9,73.3,3.2,161l35.9,13.9L74.7,161.1z" fill="#38bdf8"/>
+            <text class="seg-label" x="76" y="76" text-anchor="middle" dominant-baseline="central" transform="rotate(-44 76 76)">DATA PREP</text>
+          </a>
+          <a href="/blog?cat=develop" class={`seg-link ${categoryFilter === 'develop' ? 'is-active' : categoryFilter ? 'is-dim' : ''}`} data-cat="develop" aria-label="Develop essays">
+            <path class="seg" d="M159.3,264.5c-47.8-5-85-45.4-85-94.5c0-0.5,0-1.1,0-1.6l-35.2,13.7L3,168.1c0,0.6,0,1.3,0,1.9c0,88.6,69.3,161,156.6,166l13.7-35.4L159.3,264.5z" fill="#0ea5e9"/>
+            <text class="seg-label" x="78" y="265" text-anchor="middle" dominant-baseline="central" transform="rotate(45 78 265)">DEVELOP</text>
+          </a>
+          <a href="/blog?cat=retrain" class={`seg-link ${categoryFilter === 'retrain' ? 'is-active' : categoryFilter ? 'is-dim' : ''}`} data-cat="retrain" aria-label="Retrain essays">
+            <path class="seg" d="M335.3,180.5L300.5,167l-34,13.2l0,0l-0.5,0.2l-1.3,0.5c0,0,0,0,0,0.1c0,0,0,0,0,0l-1,0.4c-5.6,47.2-45.7,83.8-94.4,83.8c-0.9,0-1.8,0-2.7,0l13.8,35.7l-13.8,35.6c0.9,0,1.8,0,2.7,0c53,0,100.2-24.8,130.7-63.4c0,0,0-0.1,0-0.1C320.3,247.1,333.1,215.2,335.3,180.5z" fill="#0284c7"/>
+            <text class="seg-label" x="256" y="272" text-anchor="middle" dominant-baseline="central" transform="rotate(-32 256 272)">(RE)TRAIN</text>
+          </a>
+          <a href="/blog?cat=review" class={`seg-link ${categoryFilter === 'review' ? 'is-active' : categoryFilter ? 'is-dim' : ''}`} data-cat="review" aria-label="Review essays">
+            <path class="seg" d="M458.8,6.1c-9.2-1.6-18.6-2.4-28.1-2.4c-53,0-100.2,24.8-130.7,63.4c-22.3,28.3-35.6,64-35.6,102.9c0,1.3,0,2.6,0,3.8l36.1-14l35.1,13.6c0-1.2,0-2.3,0-3.5c0-52.5,42.6-95,95-95c4.3,0,8.5,0.3,12.7,0.8l21.1-31.3L458.8,6.1z" fill="#f0abfc"/>
+            <text class="seg-label" x="351" y="64" text-anchor="middle" dominant-baseline="central" transform="rotate(-40 351 64)">REVIEW</text>
+          </a>
+          <a href="/blog?cat=deploy" class={`seg-link ${categoryFilter === 'deploy' ? 'is-active' : categoryFilter ? 'is-dim' : ''}`} data-cat="deploy" aria-label="Deploy essays">
+            <path class="seg" d="M594.5,198.8c1.6-9.4,2.5-19,2.5-28.8c0-79.8-56.2-146.5-131.3-162.6l5.7,38.7l-20.9,31c43,9.1,75.2,47.3,75.2,93c0,4.2-0.3,8.4-0.8,12.5l32.2,21.8L594.5,198.8z" fill="#ea57ff"/>
+            <text class="seg-label" x="533" y="92" text-anchor="middle" dominant-baseline="central" transform="rotate(58 533 92)">DEPLOY</text>
+          </a>
+          <a href="/blog?cat=inference" class={`seg-link ${categoryFilter === 'inference' ? 'is-active' : categoryFilter ? 'is-dim' : ''}`} data-cat="inference" aria-label="Inference essays">
+            <path class="seg" d="M523.7,189.7c-9.1,43-47.3,75.4-93,75.4c-4.2,0-8.3-0.3-12.4-0.8L396.4,297l5.6,36.9c9.3,1.6,18.9,2.5,28.7,2.5c79.6,0,146.1-55.9,162.5-130.6l-37.6,5.5L523.7,189.7z" fill="#c026d3"/>
+            <text class="seg-label" x="508" y="276" text-anchor="middle" dominant-baseline="central" transform="rotate(-34 508 276)">INFERENCE</text>
+          </a>
+          <a href="/blog?cat=monitor" class={`seg-link ${categoryFilter === 'monitor' ? 'is-active' : categoryFilter ? 'is-dim' : ''}`} data-cat="monitor" aria-label="Monitor essays">
+            <path class="seg" d="M411.1,263c-39.7-8.3-70.2-41.3-74.9-82.2l-0.9-0.4c-2.2,34.8-15,66.7-35.3,92.4c23.4,29.7,56.8,51.2,95,59.6l-5.6-37.1L411.1,263z" fill="#a21caf"/>
+            <text class="seg-label" x="343" y="266" text-anchor="middle" dominant-baseline="central" transform="rotate(41 343 266)">MONITOR</text>
+          </a>
+          <a href="/blog?cat=ml" class={`seg-link ${categoryFilter === 'ml' ? 'is-active' : categoryFilter && categoryFilter !== 'ops' ? 'is-dim' : ''}`} data-cat="ml" aria-label="All ML essays">
+            <text class="big-label" x="169" y="170" text-anchor="middle" dominant-baseline="central">ML</text>
+          </a>
+          <a href="/blog?cat=ops" class={`seg-link ${categoryFilter === 'ops' ? 'is-active' : categoryFilter && categoryFilter !== 'ml' ? 'is-dim' : ''}`} data-cat="ops" aria-label="All Ops essays">
+            <text class="big-label" x="430" y="170" text-anchor="middle" dominant-baseline="central">OPS</text>
+          </a>
+        </svg>
+        <div class="loop-hint">
+          <span class="arrow"></span>
+          <span>Click a segment to filter</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Posts Grid -->
+  <section class="posts-section">
+    <div class="container">
+      <div class="posts__head">
+        <h2>Recent posts</h2>
+        <span>{filteredPosts.length} post{filteredPosts.length === 1 ? '' : 's'} · newest first</span>
+      </div>
+      {filteredPosts.length === 0 ? (
+        <div class="empty-state">
+          <p>No posts found{categoryFilter ? ` in category "${categoryFilter}"` : ''}.</p>
+          {categoryFilter && <a href="/blog" class="btn btn--ghost">View all posts</a>}
+        </div>
+      ) : (
+        <div class="posts-grid">
+          {filteredPosts.map((post) => {
+            const slug = post.id.split('/').pop()?.replace(/\.(md|mdx)$/, '') || post.id;
+            return (
+            <a href={`/blog/${slug}`} class="post-card" data-cat={post.data.lifecycle || post.data.category}>
+              <div class="post-card__media">
+                {post.data.cover?.src && (
+                  <Image
+                    src={post.data.cover.src}
+                    alt={post.data.cover.alt}
+                    width={600}
+                    height={450}
+                    class="post-card__image"
+                  />
+                )}
+                <span class="cat">{post.data.lifecycle || post.data.category || 'Blog'}</span>
+              </div>
+              <div class="post-card__body">
+                <div class="post-card__cat">{post.data.lifecycle || post.data.category || 'General'}</div>
+                <h3 class="post-card__title">{post.data.title}</h3>
+                <p class="post-card__desc">{post.data.snippet}</p>
+                <div class="post-card__meta">
+                  <span class="author">{post.data.author}</span>
+                  <span>· {new Date(post.data.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+              </div>
+            </a>
+          );
+          })}
+        </div>
+      )}
+    </div>
+  </section>
+</Layout>
+
+<script is:inline>
+  // Category groups for the ML / OPS nodes on the loop
+  const GROUPS = {
+    ml:  ['eda', 'data-prep', 'develop', 'retrain'],
+    ops: ['review', 'deploy', 'inference', 'monitor'],
+  };
+  const LABELS = {
+    all: 'everything', eda: 'EDA', 'data-prep': 'Data Prep', develop: 'Develop',
+    retrain: 'Retrain', review: 'Review', deploy: 'Deploy',
+    inference: 'Inference', monitor: 'Monitor', ml: 'the ML side', ops: 'the Ops side',
+  };
+
+  const posts = [...document.querySelectorAll('.post-card')];
+  const segs = [...document.querySelectorAll('.seg-link')];
+  const title = document.querySelector('.posts__head h2');
+  const countEl = document.querySelector('.posts__head span');
+  const readoutNow = document.getElementById('readoutNow');
+  const readout = document.querySelector('.filter-readout');
+  const loopHint = document.querySelector('.loop-hint');
+
+  function apply(cat) {
+    const set = GROUPS[cat] || (cat === 'all' ? null : [cat]);
+    let shown = 0;
+    posts.forEach(p => {
+      const match = !set || set.includes(p.dataset.cat);
+      p.style.display = match ? '' : 'none';
+      if (match) shown++;
+    });
+
+    // loop highlight: dim non-matching segments, mark the active one
+    segs.forEach(s => {
+      const c = s.dataset.cat;
+      const inFilter = !set || set.includes(c) || c === cat;
+      s.classList.toggle('is-dim', !!set && !inFilter);
+      s.classList.toggle('is-active', set && (c === cat));
+    });
+
+    // readout
+    if (readoutNow) readoutNow.textContent = LABELS[cat] || 'everything';
+    if (readout) readout.classList.toggle('is-filtered', cat !== 'all');
+    if (loopHint) loopHint.style.opacity = cat === 'all' ? '' : '0';
+
+    if (title) title.textContent = cat === 'all' ? 'Recent posts' : (LABELS[cat] || 'Posts');
+    if (countEl) countEl.textContent = `${shown} post${shown === 1 ? '' : 's'}` +
+      (cat === 'all' ? ' · newest first' : ' · filtered');
+  }
+
+  function setCat(cat) {
+    apply(cat);
+    const url = new URL(location);
+    if (cat === 'all') url.searchParams.delete('cat'); else url.searchParams.set('cat', cat);
+    history.replaceState(null, '', url);
+  }
+
+  segs.forEach(s => {
+    s.addEventListener('click', (e) => {
+      e.preventDefault();
+      // clicking the already-active node clears the filter
+      const next = s.classList.contains('is-active') ? 'all' : s.dataset.cat;
+      setCat(next);
+    });
+    s.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); s.click(); }
+    });
+  });
+
+  const clearBtn = document.querySelector('.filter-readout .clear');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      setCat('all');
+    });
+  }
+
+  // Honour ?cat= from the landing-page loop
+  const initial = new URLSearchParams(location.search).get('cat');
+  if (initial && LABELS[initial]) apply(initial);
+</script>
+
+<style>
+  .blog-hero {
+    padding: var(--space-8) 0 var(--space-7);
+    border-bottom: 1px solid var(--hairline);
+    position: relative;
+    overflow: hidden;
+  }
+  .blog-hero::before {
+    content: "";
+    position: absolute; top: -30%; right: -8%;
+    width: 60%; height: 160%;
+    background:
+      radial-gradient(ellipse at 60% 40%, rgba(234,87,255,.05) 0%, transparent 55%),
+      radial-gradient(ellipse at 30% 60%, rgba(14,165,233,.06) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .blog-hero__inner {
+    display: grid;
+    grid-template-columns: minmax(320px, .9fr) minmax(440px, 1.1fr);
+    gap: var(--space-7);
+    align-items: center;
+    position: relative;
+  }
+  .blog-hero__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: var(--space-3);
+    display: inline-flex; align-items: center; gap: 10px;
+  }
+  .blog-hero__eyebrow .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--secondary-container);
+    box-shadow: 0 0 0 4px rgba(234,87,255,.15);
+  }
+  .blog-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(44px, 5.4vw, 76px);
+    line-height: 0.96;
+    letter-spacing: -0.03em;
+    margin: 0 0 var(--space-3);
+    text-wrap: balance;
+  }
+  .blog-hero h1 em {
+    font-style: normal;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .blog-hero p {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--on-surface-variant);
+    margin: 0 0 var(--space-4);
+    max-width: 420px;
+    text-wrap: pretty;
+  }
+
+  .filter-readout {
+    display: inline-flex; align-items: center; gap: 12px;
+    font-family: var(--font-mono); font-size: 12px;
+    letter-spacing: 0.04em; color: var(--on-surface-variant);
+    padding-top: var(--space-3); border-top: 1px solid var(--hairline);
+  }
+  .filter-readout .now { color: var(--on-surface); font-weight: 600; }
+  .filter-readout .clear {
+    display: none;
+    background: var(--on-surface); color: #fff; border: 0;
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.1em;
+    text-transform: uppercase; padding: 6px 10px; cursor: pointer;
+    text-decoration: none;
+    border-radius: var(--radius-xs);
+  }
+  .filter-readout .clear:hover { background: var(--primary); }
+  .filter-readout.is-filtered .clear { display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Loop (reused from homepage) */
+  .loop-stage { position: relative; width: 100%; aspect-ratio: 600 / 340; max-width: 680px; margin-left: auto; }
+  .loop-stage::before {
+    content: ""; position: absolute; inset: -8%;
+    background:
+      radial-gradient(ellipse 46% 60% at 28% 50%, rgba(14,165,233,.12) 0%, transparent 70%),
+      radial-gradient(ellipse 46% 60% at 72% 50%, rgba(234,87,255,.12) 0%, transparent 70%);
+    filter: blur(26px); pointer-events: none;
+  }
+  .loop-svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+  .seg-link { cursor: pointer; }
+  .seg { transition: filter 200ms ease, opacity 240ms ease; }
+  .seg-link:hover .seg { filter: brightness(1.08) saturate(1.06); }
+  .seg-link.is-dim .seg { opacity: 0.16; }
+  .seg-link.is-dim .seg-label { opacity: 0.22; }
+  .seg-link.is-active .seg { filter: brightness(1.12) saturate(1.1) drop-shadow(0 4px 14px rgba(0,0,0,.18)); }
+  .seg-label {
+    font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+    letter-spacing: 0.1em; fill: #ffffff; pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.28); transition: opacity 240ms ease;
+  }
+  .big-label {
+    font-family: var(--font-display); font-weight: 700; font-size: 46px;
+    letter-spacing: 0.01em; fill: var(--on-surface); cursor: pointer;
+    transition: fill 200ms, letter-spacing 200ms, opacity 240ms;
+  }
+  .seg-link:hover .big-label { letter-spacing: 0.04em; }
+  .seg-link[data-cat="ml"]:hover .big-label,
+  .seg-link[data-cat="ml"].is-active .big-label { fill: #0ea5e9; }
+  .seg-link[data-cat="ops"]:hover .big-label,
+  .seg-link[data-cat="ops"].is-active .big-label { fill: var(--secondary); }
+  .seg-link.is-dim .big-label { opacity: 0.2; }
+  .loop-hint {
+    position: absolute; pointer-events: none; left: 50%; bottom: -40px;
+    transform: translateX(-50%);
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase; color: var(--on-surface-muted);
+    display: flex; align-items: center; gap: 10px; white-space: nowrap;
+  }
+  .loop-hint .arrow { display: inline-block; width: 14px; height: 1px; background: var(--on-surface-muted); position: relative; }
+  .loop-hint .arrow::after { content: ""; position: absolute; right: 0; top: -2px; width: 5px; height: 5px; border-top: 1px solid var(--on-surface-muted); border-right: 1px solid var(--on-surface-muted); transform: rotate(45deg); }
+
+  /* Posts section */
+  .posts-section {
+    padding: var(--space-7) 0 var(--space-8);
+  }
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+  .post-card {
+    display: flex; flex-direction: column;
+    border: 1px solid var(--hairline);
+    background: var(--surface-container-lowest);
+    text-decoration: none; color: inherit;
+    transition: border-color 200ms, transform 200ms;
+  }
+  .post-card:hover { border-color: var(--on-surface-variant); transform: translateY(-2px); }
+  .post-card__media {
+    aspect-ratio: 16 / 9; position: relative;
+    background: repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px);
+    overflow: hidden;
+  }
+  .post-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .post-card__media .cat {
+    position: absolute; top: 12px; left: 12px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600;
+    background: rgba(255,255,255,.95); padding: 4px 8px; color: var(--on-surface);
+    z-index: 1;
+  }
+  .post-card__body { padding: var(--space-3) var(--space-3) var(--space-4); display: flex; flex-direction: column; flex: 1; }
+  .post-card__cat {
+    font-family: var(--font-mono); font-size: 10.5px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--primary-container); margin-bottom: 8px;
+  }
+  .post-card__title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 18px; line-height: 1.2; letter-spacing: -0.012em;
+    margin: 0 0 12px; text-wrap: balance;
+  }
+  .post-card__desc {
+    font-size: 14px; color: var(--on-surface-variant); line-height: 1.5;
+    margin: 0 0 auto;
+  }
+  .post-card__meta {
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--hairline);
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--on-surface-muted);
+    letter-spacing: 0.03em; display: flex; gap: 8px; align-items: center;
+  }
+  .post-card__meta .author { color: var(--on-surface); font-weight: 600; }
+
+  .empty-state {
+    text-align: center;
+    padding: var(--space-8) 0;
+    color: var(--on-surface-variant);
+  }
+  .empty-state p {
+    font-size: 18px;
+    margin-bottom: var(--space-4);
+  }
+
+  .posts__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .posts__head h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.015em;
+    margin: 0;
+  }
+  .posts__head span {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+
+  /* Loop segment states */
+  .seg-link.is-dim {
+    opacity: 0.3;
+  }
+  .seg-link.is-active .seg {
+    filter: brightness(1.15);
+  }
+  .seg-link.is-active .seg-label {
+    font-weight: 700;
+  }
+
+  @media (max-width: 900px) {
+    .blog-hero__inner, .posts-grid { grid-template-columns: 1fr; }
+  }
+</style>

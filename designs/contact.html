@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Contact · MLOps.Ninja</title>
+<link rel="stylesheet" href="styles/tokens.css" />
+<style>
+  body { background: var(--surface-container-lowest); }
+
+  /* ============ PAGE HERO ============ */
+  .page-hero {
+    padding: var(--space-9) 0 var(--space-7);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .page-hero__inner {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--space-7);
+    align-items: end;
+  }
+  .page-hero__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: var(--space-3);
+    display: inline-flex; align-items: center; gap: 10px;
+    white-space: nowrap;
+  }
+  .page-hero__eyebrow .dot {
+    width: 6px; height: 6px;
+    background: var(--secondary-container);
+  }
+  .page-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(56px, 7vw, 96px);
+    line-height: 0.96;
+    letter-spacing: -0.03em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .page-hero h1 em {
+    font-style: normal;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .page-hero p {
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--on-surface-variant);
+    margin: 0;
+    max-width: 420px;
+    text-wrap: pretty;
+  }
+
+  /* ============ MAIN GRID ============ */
+  .contact-wrap {
+    padding: var(--space-7) 0 var(--space-8);
+  }
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: var(--space-1);
+    border: 1px solid var(--hairline);
+  }
+
+  /* ---- Left: channels ---- */
+  .channels {
+    padding: var(--space-5);
+    background: var(--surface);
+    border-right: 1px solid var(--hairline);
+    display: flex; flex-direction: column;
+    gap: var(--space-4);
+  }
+  .channels__intro {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--on-surface);
+  }
+  .channels__intro em {
+    font-style: normal;
+    color: var(--primary-container);
+  }
+  .channel {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 14px;
+    align-items: start;
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .channel__icon {
+    width: 36px; height: 36px;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--primary);
+  }
+  .channel__icon--fuchsia { color: var(--secondary); }
+  .channel__k {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: 6px;
+  }
+  .channel__v {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.015em;
+    color: var(--on-surface);
+    text-decoration: none;
+    line-height: 1.15;
+  }
+  .channel__v:hover { color: var(--primary); }
+  .channel__note {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--on-surface-muted);
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .availability {
+    margin-top: auto;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--hairline);
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--on-surface-variant);
+  }
+  .availability .status-dot {
+    width: 8px; height: 8px;
+    background: #22c55e;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(34,197,94,.15);
+  }
+
+  /* ---- Right: form ---- */
+  .form {
+    padding: var(--space-5);
+    background: var(--surface-container-lowest);
+  }
+  .form__head { margin-bottom: var(--space-5); }
+  .form__head h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.015em;
+    margin: 0 0 8px;
+  }
+  .form__head p {
+    font-size: 14.5px;
+    color: var(--on-surface-variant);
+    margin: 0;
+    line-height: 1.55;
+  }
+  .form__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2) var(--space-3);
+  }
+  .field { display: flex; flex-direction: column; gap: 8px; }
+  .field--full { grid-column: 1 / -1; }
+  .field label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--on-surface);
+    font-weight: 600;
+  }
+  .field label .req { color: var(--secondary); margin-left: 4px; }
+  .field input,
+  .field textarea,
+  .field select {
+    padding: 14px 16px;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    color: var(--on-surface);
+    font-family: var(--font-body);
+    font-size: 15.5px;
+    line-height: 1.4;
+    border-radius: var(--radius-sm);
+    transition: border-color 160ms, box-shadow 160ms;
+    width: 100%;
+  }
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--primary-container);
+    box-shadow: 0 0 0 4px rgba(14,165,233,.12);
+  }
+  .field textarea {
+    min-height: 160px;
+    resize: vertical;
+  }
+  .field__hint {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.02em;
+  }
+
+  .stage-pick {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .stage-pick label {
+    cursor: pointer;
+    padding: 12px 14px;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    color: var(--on-surface);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    transition: all 140ms;
+    user-select: none;
+  }
+  .stage-pick label:hover { border-color: var(--on-surface-variant); }
+  .stage-pick input { display: none; }
+  .stage-pick input:checked + label {
+    background: var(--on-surface); color: #fff; border-color: var(--on-surface);
+  }
+
+  .form__foot {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: var(--space-4);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--hairline);
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .form__privacy {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.02em;
+    max-width: 360px;
+  }
+  .form__privacy a { color: var(--on-surface); }
+  .form__submit {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 22px;
+    background: var(--on-surface);
+    color: #fff;
+    border: 0;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 160ms, transform 160ms;
+  }
+  .form__submit:hover { background: var(--primary); transform: translateY(-1px); }
+
+  /* ============ FAQ STRIP ============ */
+  .faq {
+    border-top: 1px solid var(--hairline);
+    background: var(--surface);
+    padding: var(--space-8) 0;
+  }
+  .faq__head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .faq__head h2 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 32px; letter-spacing: -0.02em; margin: 0;
+  }
+  .faq__head .id {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+  .faq__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4) var(--space-5);
+  }
+  .faq__item {
+    border-top: 1px solid var(--hairline);
+    padding-top: var(--space-3);
+  }
+  .faq__q {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.012em;
+    margin: 0 0 8px;
+  }
+  .faq__a {
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--on-surface-variant);
+    margin: 0;
+    text-wrap: pretty;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 860px) {
+    .page-hero__inner { grid-template-columns: 1fr; gap: var(--space-3); align-items: start; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .channels { border-right: 0; border-bottom: 1px solid var(--hairline); }
+  }
+  @media (max-width: 520px) {
+    .form__grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body data-screen-label="Contact">
+
+<header id="site-header" data-active="contact"></header>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="container page-hero__inner">
+    <div>
+      <div class="page-hero__eyebrow"><span class="dot"></span><span>Say hello</span></div>
+      <h1>Got something <em>worth chewing on</em>?</h1>
+    </div>
+    <p>An idea, a project, a question, a sharp disagreement with something we wrote — send it over. We read everything and reply to most of it.</p>
+  </div>
+</section>
+
+<!-- CONTACT GRID -->
+<section class="contact-wrap">
+  <div class="container">
+    <div class="contact-grid">
+
+      <!-- CHANNELS -->
+      <aside class="channels">
+        <p class="channels__intro">
+          However you like to start a conversation &mdash; <em>the form, an email, or the open repos</em>.
+        </p>
+
+        <div class="channel">
+          <div class="channel__icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="1"/><path d="m3 7 9 6 9-6"/></svg>
+          </div>
+          <div>
+            <div class="channel__k">Email</div>
+            <a class="channel__v" href="mailto:launch@mlops.ninja">launch@mlops.ninja</a>
+            <div class="channel__note">Goes straight to the people who write here</div>
+          </div>
+        </div>
+
+        <div class="channel">
+          <div class="channel__icon channel__icon--fuchsia">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/></svg>
+          </div>
+          <div>
+            <div class="channel__k">Open source</div>
+            <a class="channel__v" href="https://github.com/mlnja" target="_blank" rel="noopener">github.com/mlnja</a>
+            <div class="channel__note">Issues &amp; PRs welcome &mdash; we read those too</div>
+          </div>
+        </div>
+
+        <div class="availability">
+          <span class="status-dot"></span>
+          <span>Inbox is <b style="color: var(--on-surface);">open</b> &mdash; no pitch required</span>
+        </div>
+      </aside>
+
+      <!-- FORM -->
+      <form class="form" onsubmit="event.preventDefault(); this.querySelector('.form__submit').textContent = 'Thanks — we\\'ll be in touch ✓'; this.querySelector('.form__submit').style.background = '#22c55e';">
+        <div class="form__head">
+          <h2>Drop us a line.</h2>
+          <p>No brief template, no qualifying questions. Tell us what&rsquo;s on your mind &mdash; it lands directly with Dmitry and Ilya, not a shared inbox.</p>
+        </div>
+
+        <div class="form__grid">
+          <div class="field">
+            <label for="f-name">Your name<span class="req">*</span></label>
+            <input id="f-name" name="name" type="text" required placeholder="Jane Cooper" />
+          </div>
+          <div class="field">
+            <label for="f-email">Email<span class="req">*</span></label>
+            <input id="f-email" name="email" type="email" required placeholder="jane@example.com" />
+          </div>
+
+          <div class="field field--full">
+            <label for="f-msg">What&rsquo;s on your mind?<span class="req">*</span></label>
+            <textarea id="f-msg" name="message" required placeholder="An idea you can&rsquo;t shake, a project you&rsquo;re mulling, a question, or just something we wrote that you want to argue about…"></textarea>
+            <span class="field__hint">However half-formed. We like the abstract ones.</span>
+          </div>
+        </div>
+
+        <div class="form__foot">
+          <p class="form__privacy">
+            We&rsquo;ll only use your details to reply. No marketing, no third parties, no list.
+          </p>
+          <button class="form__submit" type="submit">
+            Send it over
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+<script src="chrome.js"></script>
+
+</body>
+</html>

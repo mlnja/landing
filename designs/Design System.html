@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MLOps.Ninja · Design System v1.0</title>
+<link rel="stylesheet" href="styles/tokens.css" />
+<style>
+  body { background: var(--surface-container-lowest); color: var(--on-surface); }
+
+  /* Page layout */
+  .ds-shell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+  .ds-side {
+    border-right: 1px solid var(--hairline);
+    background: var(--surface);
+    padding: var(--space-5) var(--space-3);
+    position: sticky; top: 0;
+    height: 100vh;
+    overflow: auto;
+  }
+  .ds-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 17px;
+    margin-bottom: var(--space-5);
+  }
+  .ds-brand img { width: 28px; height: 28px; }
+  .ds-side h5 {
+    font-family: var(--font-mono);
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin: var(--space-3) 0 8px;
+  }
+  .ds-side a {
+    display: block;
+    font-size: 13.5px;
+    color: var(--on-surface-variant);
+    padding: 6px 8px;
+    border-radius: var(--radius-sm);
+    transition: background 120ms, color 120ms;
+  }
+  .ds-side a:hover { background: var(--surface-container-low); color: var(--on-surface); }
+  .ds-side .meta {
+    margin-top: var(--space-7);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.7;
+    color: var(--on-surface-muted);
+  }
+
+  .ds-main { padding: var(--space-7) var(--space-7); max-width: 1140px; }
+
+  /* Hero */
+  .ds-hero {
+    padding: 0 0 var(--space-7);
+    margin-bottom: var(--space-7);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .ds-hero .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: var(--space-2);
+  }
+  .ds-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 56px;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    margin: 0 0 var(--space-3);
+    max-width: 740px;
+    text-wrap: balance;
+  }
+  .ds-hero h1 em {
+    font-style: normal;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .ds-hero p {
+    font-size: 17px; color: var(--on-surface-variant);
+    max-width: 620px; line-height: 1.55;
+    margin: 0;
+  }
+  .ds-hero .pillars {
+    display: flex; gap: var(--space-5);
+    margin-top: var(--space-5);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-mono);
+    font-size: 12px; line-height: 1.5;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+  }
+  .ds-hero .pillars b {
+    display: block; color: var(--on-surface);
+    font-size: 13px; font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 4px;
+  }
+
+  /* Section */
+  .ds-sec { margin-bottom: var(--space-9); }
+  .ds-sec__head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .ds-sec__head h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: -0.015em;
+    margin: 0;
+  }
+  .ds-sec__head .id {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+  .ds-sec__lead {
+    font-size: 15px; color: var(--on-surface-variant);
+    max-width: 640px; line-height: 1.6;
+    margin: -10px 0 var(--space-5);
+  }
+  .ds-sub { margin-top: var(--space-6); }
+  .ds-sub h3 {
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 16px;
+    letter-spacing: -0.01em;
+    margin: 0 0 var(--space-2);
+  }
+
+  /* ===== LOGO ===== */
+  .logo-board {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 1px;
+    background: var(--hairline);
+    border: 1px solid var(--hairline);
+  }
+  .logo-cell {
+    background: var(--surface-container-lowest);
+    padding: var(--space-5);
+    display: flex; align-items: center; justify-content: center;
+    aspect-ratio: 4/3;
+    position: relative;
+  }
+  .logo-cell--dark { background: var(--inverse-surface); color: #fff; }
+  .logo-cell--surface { background: var(--surface); }
+  .logo-cell img { width: 96px; height: 96px; }
+  .logo-cell .lockup {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 24px;
+    letter-spacing: -0.012em;
+  }
+  .logo-cell .lockup img { width: 36px; height: 36px; }
+  .logo-cell .lockup .suffix { color: var(--on-surface-muted); }
+  .logo-cell--dark .lockup .suffix { color: rgba(255,255,255,.45); }
+  .logo-cell .tag {
+    position: absolute; bottom: 12px; left: 12px;
+    font-family: var(--font-mono); font-size: 10px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+  .logo-cell--dark .tag { color: rgba(255,255,255,.45); }
+
+  /* ===== COLORS ===== */
+  .palette {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1px;
+    background: var(--hairline);
+    border: 1px solid var(--hairline);
+  }
+  .swatch {
+    background: var(--surface-container-lowest);
+    padding: 0;
+    display: flex; flex-direction: column;
+  }
+  .swatch__chip {
+    aspect-ratio: 1.4 / 1;
+  }
+  .swatch__meta {
+    padding: 10px 12px;
+    border-top: 1px solid var(--hairline);
+    background: #fff;
+  }
+  .swatch__name {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    color: var(--on-surface); letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: block; margin-bottom: 2px;
+  }
+  .swatch__hex {
+    font-family: var(--font-mono); font-size: 10.5px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.02em;
+  }
+  .palette--accents .swatch__chip { aspect-ratio: 1 / 1; }
+
+  .gradient-chip {
+    height: 140px;
+    background: linear-gradient(90deg, #ff00ff 0%, #00bcd4 100%);
+    position: relative;
+    border: 1px solid var(--hairline);
+  }
+  .gradient-chip__caption {
+    position: absolute; bottom: 12px; left: 12px;
+    background: rgba(255,255,255,.9);
+    padding: 6px 10px;
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--on-surface);
+  }
+
+  /* ===== TYPE ===== */
+  .type-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+    border-bottom: 1px solid var(--hairline);
+    align-items: baseline;
+  }
+  .type-row:last-child { border-bottom: 0; }
+  .type-meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--on-surface-muted);
+    line-height: 1.6;
+    letter-spacing: 0.04em;
+  }
+  .type-meta b {
+    display: block;
+    font-size: 12px; font-weight: 600;
+    color: var(--on-surface);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 4px;
+  }
+
+  /* ===== SPACING ===== */
+  .space-stack {
+    display: flex; flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+  }
+  .space-row {
+    display: grid;
+    grid-template-columns: 80px 80px 1fr;
+    gap: var(--space-3);
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+  }
+  .space-row__name { color: var(--on-surface); font-weight: 600; }
+  .space-row__val { color: var(--on-surface-muted); }
+  .space-row__bar {
+    height: 12px;
+    background: var(--primary-container);
+  }
+
+  /* ===== RADII ===== */
+  .radii {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3);
+  }
+  .radius-cell {
+    aspect-ratio: 1.3 / 1;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px;
+  }
+  .radius-shape {
+    width: 60px; height: 60px;
+    background: var(--on-surface);
+  }
+  .radius-cell .lbl {
+    font-family: var(--font-mono); font-size: 11px;
+    color: var(--on-surface-muted);
+  }
+  .radius-cell .lbl b { color: var(--on-surface); font-weight: 600; }
+
+  /* ===== COMPONENTS ===== */
+  .comp-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+  .comp-cell {
+    border: 1px solid var(--hairline);
+    background: var(--surface-container-lowest);
+    padding: var(--space-4);
+    min-height: 160px;
+    display: flex; flex-direction: column;
+    gap: var(--space-3);
+  }
+  .comp-cell__title {
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+  .comp-cell__demo {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    align-items: center;
+    flex: 1;
+  }
+  .comp-cell--dark { background: var(--inverse-surface); color: #fff; }
+  .comp-cell--dark .comp-cell__title { color: rgba(255,255,255,.5); }
+
+  .input {
+    padding: 10px 12px;
+    border: 1px solid var(--hairline);
+    background: #fff;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--on-surface);
+    border-radius: var(--radius-sm);
+    width: 260px;
+  }
+  .input:focus { outline: none; border-color: var(--primary-container); box-shadow: 0 0 0 4px rgba(14,165,233,.12); }
+
+  /* Loop demo */
+  .loop-demo {
+    aspect-ratio: 1.6/1;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    position: relative;
+    padding: var(--space-4);
+  }
+  .loop-demo svg { width: 100%; height: 100%; }
+  .loop-demo .label {
+    position: absolute; bottom: 12px; left: 12px;
+    font-family: var(--font-mono); font-size: 10px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.14em; text-transform: uppercase;
+  }
+  .demo-rail { fill:none; stroke:#e6eaf3; stroke-width:28; stroke-linecap:round; }
+  .demo-flow { fill:none; stroke: url(#dsFlow); stroke-width:2.5; stroke-linecap:round; stroke-dasharray: 14 10; animation: dsFlow 22s linear infinite; }
+  @keyframes dsFlow { to { stroke-dashoffset: -800; } }
+
+  /* ===== VOICE ===== */
+  .voice-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
+  .voice-cell {
+    border: 1px solid var(--hairline);
+    padding: var(--space-4);
+    background: #fff;
+  }
+  .voice-cell .head {
+    display: flex; align-items: center; gap: 10px;
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    margin-bottom: var(--space-2);
+  }
+  .voice-cell .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .voice-cell--do { border-top: 2px solid #22c55e; }
+  .voice-cell--do .dot { background: #22c55e; }
+  .voice-cell--do .head span { color: #15803d; }
+  .voice-cell--dont { border-top: 2px solid #f43f5e; }
+  .voice-cell--dont .dot { background: #f43f5e; }
+  .voice-cell--dont .head span { color: #be123c; }
+  .voice-cell p {
+    font-size: 16px; line-height: 1.5;
+    margin: 0;
+    color: var(--on-surface);
+  }
+  .voice-cell p + p { margin-top: var(--space-2); }
+</style>
+</head>
+<body data-screen-label="Design System">
+
+<div class="ds-shell">
+  <aside class="ds-side">
+    <div class="ds-brand">
+      <img src="assets/logo.svg" alt="" />
+      <span>MLOps<span style="color: var(--on-surface-muted)">.Ninja</span></span>
+    </div>
+
+    <h5>Foundation</h5>
+    <a href="#logo">Logo &amp; Brand</a>
+    <a href="#color">Color</a>
+    <a href="#type">Typography</a>
+    <a href="#space">Spacing &amp; Grid</a>
+    <a href="#shape">Shape &amp; Radii</a>
+
+    <h5>Components</h5>
+    <a href="#buttons">Buttons</a>
+    <a href="#chips">Chips &amp; Labels</a>
+    <a href="#inputs">Inputs</a>
+    <a href="#cards">Cards</a>
+    <a href="#loop">Lifecycle Loop</a>
+
+    <h5>Language</h5>
+    <a href="#voice">Voice &amp; Tone</a>
+
+    <div class="meta">
+      v1.0.0<br/>
+      Updated 23 May 2026<br/>
+      Maintained in-house
+    </div>
+  </aside>
+
+  <main class="ds-main">
+
+    <!-- HERO -->
+    <header class="ds-hero">
+      <div class="eyebrow">Luminous Precision · v1.0</div>
+      <h1>The design system behind <em>MLOps.Ninja</em>.</h1>
+      <p>A small, opinionated set of tokens and components for everything we ship — site, decks, case studies, and product UI. Warm-white surfaces, sharp geometry, and one accountable brand mark.</p>
+      <div class="pillars">
+        <div><b>Type</b>Podkova · JetBrains Mono</div>
+        <div><b>Surface</b>Warm white · slate ink</div>
+        <div><b>Accents</b>Sky · Fuchsia · Amber</div>
+        <div><b>Grid</b>8px · 1280 max · 12 col</div>
+      </div>
+    </header>
+
+    <!-- ============ LOGO ============ -->
+    <section class="ds-sec" id="logo">
+      <div class="ds-sec__head">
+        <h2>Logo &amp; brand mark</h2>
+        <span class="id">01 · Brand</span>
+      </div>
+      <p class="ds-sec__lead">The infinity mark loops magenta → cyan → orange — a literal pointer at the lifecycle we operate inside. It always sits on a quiet surface; never compete with the gradient.</p>
+
+      <div class="logo-board">
+        <div class="logo-cell">
+          <img src="assets/logo.svg" alt="MLOps.Ninja logo mark" />
+          <span class="tag">Mark · isolated</span>
+        </div>
+        <div class="logo-cell">
+          <div class="lockup">
+            <img src="assets/logo.svg" alt="" />
+            <span>MLOps<span class="suffix">.Ninja</span></span>
+          </div>
+          <span class="tag">Lockup · light</span>
+        </div>
+        <div class="logo-cell logo-cell--dark">
+          <div class="lockup">
+            <img src="assets/logo.svg" alt="" />
+            <span style="color:#fff">MLOps<span class="suffix">.Ninja</span></span>
+          </div>
+          <span class="tag">Lockup · dark</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ COLOR ============ -->
+    <section class="ds-sec" id="color">
+      <div class="ds-sec__head">
+        <h2>Color</h2>
+        <span class="id">02 · Color</span>
+      </div>
+      <p class="ds-sec__lead">A neutral, warm-white stack carries 95% of the surface area. The brand gradient appears once per page — on a hero word, the loop, or a single accent — never as a UI fill.</p>
+
+      <div class="ds-sub">
+        <h3>Surfaces</h3>
+        <div class="palette">
+          <div class="swatch"><div class="swatch__chip" style="background:#ffffff; box-shadow: inset 0 0 0 1px var(--hairline)"></div><div class="swatch__meta"><span class="swatch__name">Lowest</span><span class="swatch__hex">#FFFFFF</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#faf8ff"></div><div class="swatch__meta"><span class="swatch__name">Surface</span><span class="swatch__hex">#FAF8FF</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#f2f3ff"></div><div class="swatch__meta"><span class="swatch__name">Low</span><span class="swatch__hex">#F2F3FF</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#eaedff"></div><div class="swatch__meta"><span class="swatch__name">Container</span><span class="swatch__hex">#EAEDFF</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#e2e7ff"></div><div class="swatch__meta"><span class="swatch__name">High</span><span class="swatch__hex">#E2E7FF</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#dae2fd"></div><div class="swatch__meta"><span class="swatch__name">Highest</span><span class="swatch__hex">#DAE2FD</span></div></div>
+        </div>
+      </div>
+
+      <div class="ds-sub">
+        <h3>Ink &amp; line</h3>
+        <div class="palette">
+          <div class="swatch"><div class="swatch__chip" style="background:#131b2e"></div><div class="swatch__meta"><span class="swatch__name">On-surface</span><span class="swatch__hex">#131B2E</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#3e4850"></div><div class="swatch__meta"><span class="swatch__name">Variant</span><span class="swatch__hex">#3E4850</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#6e7881"></div><div class="swatch__meta"><span class="swatch__name">Muted</span><span class="swatch__hex">#6E7881</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#bec8d2"></div><div class="swatch__meta"><span class="swatch__name">Outline</span><span class="swatch__hex">#BEC8D2</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#e2e8f0"></div><div class="swatch__meta"><span class="swatch__name">Hairline</span><span class="swatch__hex">#E2E8F0</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#0b0f1e"></div><div class="swatch__meta"><span class="swatch__name">Inverse</span><span class="swatch__hex">#0B0F1E</span></div></div>
+        </div>
+      </div>
+
+      <div class="ds-sub">
+        <h3>Accents · use sparingly</h3>
+        <div class="palette palette--accents">
+          <div class="swatch"><div class="swatch__chip" style="background:#006591"></div><div class="swatch__meta"><span class="swatch__name">Sky 700</span><span class="swatch__hex">#006591</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#0ea5e9"></div><div class="swatch__meta"><span class="swatch__name">Sky 500</span><span class="swatch__hex">#0EA5E9</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#a200ba"></div><div class="swatch__meta"><span class="swatch__name">Fuchsia 700</span><span class="swatch__hex">#A200BA</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#ea57ff"></div><div class="swatch__meta"><span class="swatch__name">Fuchsia 500</span><span class="swatch__hex">#EA57FF</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#de8712"></div><div class="swatch__meta"><span class="swatch__name">Amber 500</span><span class="swatch__hex">#DE8712</span></div></div>
+          <div class="swatch"><div class="swatch__chip" style="background:#22c55e"></div><div class="swatch__meta"><span class="swatch__name">Status OK</span><span class="swatch__hex">#22C55E</span></div></div>
+        </div>
+      </div>
+
+      <div class="ds-sub">
+        <h3>Brand gradient</h3>
+        <div class="gradient-chip">
+          <div class="gradient-chip__caption">
+            linear-gradient(90deg, #FF00FF 0% → #00BCD4 100%) — hero word, loop, or one accent per page
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TYPE ============ -->
+    <section class="ds-sec" id="type">
+      <div class="ds-sec__head">
+        <h2>Typography</h2>
+        <span class="id">03 · Type</span>
+      </div>
+      <p class="ds-sec__lead">Podkova carries all display + body — its slabby Cyrillic-friendly forms give us a quietly literary technical voice. JetBrains Mono handles labels, captions, code, and stats.</p>
+
+      <div class="type-row">
+        <div class="type-meta"><b>Display XL</b>Podkova 700 · 104px<br/>line 0.98 · tracking -2.5%</div>
+        <div class="display-xl">Reliable ML systems, end-to-end.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><b>Display LG</b>Podkova 700 · 64px<br/>line 1.04 · tracking -2%</div>
+        <div class="display-lg">Every stage of the lifecycle, in one stack.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><b>Headline LG</b>Podkova 600 · 40px<br/>line 1.15 · tracking -1.5%</div>
+        <div class="headline-lg">Section headlines sit here.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><b>Headline MD</b>Podkova 600 · 24px<br/>line 1.25 · tracking -1%</div>
+        <div class="headline-md">Card and tile titles.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><b>Body LG</b>Podkova 400 · 18px<br/>line 1.55</div>
+        <div class="body-lg">We're a small senior team that designs, ships, and looks after production machine-learning systems.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><b>Body MD</b>Podkova 400 · 16px<br/>line 1.55</div>
+        <div class="body-md">Everyday paragraph copy. The default for blog posts, descriptions, and most card bodies.</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><b>Label</b>JetBrains Mono 500 · 11px<br/>tracking 14% · uppercase</div>
+        <div class="label">Machine-learning agency · Berlin</div>
+      </div>
+      <div class="type-row">
+        <div class="type-meta"><b>Mono</b>JetBrains Mono 400 · 13px<br/>tracking 0</div>
+        <div class="mono">hello@mlops.ninja · v1.0.4 · 42ms p99 · drift 0.02</div>
+      </div>
+    </section>
+
+    <!-- ============ SPACING ============ -->
+    <section class="ds-sec" id="space">
+      <div class="ds-sec__head">
+        <h2>Spacing &amp; grid</h2>
+        <span class="id">04 · Layout</span>
+      </div>
+      <p class="ds-sec__lead">Strict 8px baseline. Content lives in a 1280px max-width 12-column container with 24px gutters, 64px page margins on desktop, 80px section padding.</p>
+
+      <div class="space-stack">
+        <div class="space-row"><span class="space-row__name">space-1</span><span class="space-row__val">8px</span><div class="space-row__bar" style="width:8px"></div></div>
+        <div class="space-row"><span class="space-row__name">space-2</span><span class="space-row__val">16px</span><div class="space-row__bar" style="width:16px"></div></div>
+        <div class="space-row"><span class="space-row__name">space-3</span><span class="space-row__val">24px (gutter)</span><div class="space-row__bar" style="width:24px"></div></div>
+        <div class="space-row"><span class="space-row__name">space-4</span><span class="space-row__val">32px</span><div class="space-row__bar" style="width:32px"></div></div>
+        <div class="space-row"><span class="space-row__name">space-5</span><span class="space-row__val">40px</span><div class="space-row__bar" style="width:40px"></div></div>
+        <div class="space-row"><span class="space-row__name">space-6</span><span class="space-row__val">48px</span><div class="space-row__bar" style="width:48px"></div></div>
+        <div class="space-row"><span class="space-row__name">space-7</span><span class="space-row__val">64px (margin)</span><div class="space-row__bar" style="width:64px"></div></div>
+        <div class="space-row"><span class="space-row__name">space-8</span><span class="space-row__val">80px (section)</span><div class="space-row__bar" style="width:80px"></div></div>
+        <div class="space-row"><span class="space-row__name">space-9</span><span class="space-row__val">120px (hero)</span><div class="space-row__bar" style="width:120px"></div></div>
+      </div>
+    </section>
+
+    <!-- ============ SHAPE ============ -->
+    <section class="ds-sec" id="shape">
+      <div class="ds-sec__head">
+        <h2>Shape &amp; radii</h2>
+        <span class="id">05 · Form</span>
+      </div>
+      <p class="ds-sec__lead">Geometry stays intentional and structured. Soft 2–8px on UI elements; never fully rounded pills — those read as consumer SaaS.</p>
+
+      <div class="radii">
+        <div class="radius-cell">
+          <div class="radius-shape" style="border-radius:0"></div>
+          <div class="lbl"><b>none</b> · 0px · dividers, hero tiles</div>
+        </div>
+        <div class="radius-cell">
+          <div class="radius-shape" style="border-radius:2px"></div>
+          <div class="lbl"><b>xs</b> · 2px · chips, labels</div>
+        </div>
+        <div class="radius-cell">
+          <div class="radius-shape" style="border-radius:4px"></div>
+          <div class="lbl"><b>sm</b> · 4px · buttons, inputs</div>
+        </div>
+        <div class="radius-cell">
+          <div class="radius-shape" style="border-radius:8px"></div>
+          <div class="lbl"><b>lg</b> · 8px · cards, modals</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ BUTTONS ============ -->
+    <section class="ds-sec" id="buttons">
+      <div class="ds-sec__head">
+        <h2>Buttons</h2>
+        <span class="id">06 · Components</span>
+      </div>
+      <p class="ds-sec__lead">One primary per view. Primary is solid ink (not sky) — sky reads as a link or selected state. Sky is reserved for product surfaces &amp; the topbar CTA.</p>
+
+      <div class="comp-grid">
+        <div class="comp-cell">
+          <span class="comp-cell__title">Primary · ink</span>
+          <div class="comp-cell__demo">
+            <button class="btn btn--primary">Start a project</button>
+            <button class="btn btn--primary btn--sm">Start a project →</button>
+          </div>
+        </div>
+        <div class="comp-cell">
+          <span class="comp-cell__title">Sky · product CTA</span>
+          <div class="comp-cell__demo">
+            <button class="btn btn--sky">Get started</button>
+            <button class="btn btn--sky btn--sm">Get started</button>
+          </div>
+        </div>
+        <div class="comp-cell">
+          <span class="comp-cell__title">Ghost · secondary</span>
+          <div class="comp-cell__demo">
+            <button class="btn btn--ghost">See how we work →</button>
+            <button class="btn btn--ghost btn--sm">Learn more</button>
+          </div>
+        </div>
+        <div class="comp-cell">
+          <span class="comp-cell__title">Text</span>
+          <div class="comp-cell__demo">
+            <button class="btn btn--text">Sign in</button>
+            <button class="btn btn--text btn--sm">Docs</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CHIPS ============ -->
+    <section class="ds-sec" id="chips">
+      <div class="ds-sec__head">
+        <h2>Chips &amp; eyebrows</h2>
+        <span class="id">07 · Components</span>
+      </div>
+      <p class="ds-sec__lead">Mono labels sit inside thin chips. Use the dot to signal status or category; pair with concise mono label copy.</p>
+
+      <div class="comp-grid">
+        <div class="comp-cell">
+          <span class="comp-cell__title">Eyebrow chip</span>
+          <div class="comp-cell__demo">
+            <span class="chip"><span class="chip__dot"></span><span class="label">A Machine-learning agency</span></span>
+            <span class="chip"><span class="chip__dot" style="background: var(--primary-container)"></span><span class="label">v1.0 · Automation</span></span>
+          </div>
+        </div>
+        <div class="comp-cell">
+          <span class="comp-cell__title">Bare labels</span>
+          <div class="comp-cell__demo">
+            <span class="label">01 · EDA</span>
+            <span class="label" style="color: var(--secondary)">Data Prep &amp; Develop</span>
+            <span class="label" style="color: var(--on-surface)">04 · Retrain</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ INPUTS ============ -->
+    <section class="ds-sec" id="inputs">
+      <div class="ds-sec__head">
+        <h2>Inputs</h2>
+        <span class="id">08 · Components</span>
+      </div>
+      <p class="ds-sec__lead">White ground, hairline border, 4px radius. Focus ring is a 4px sky tint — not a hard shadow.</p>
+
+      <div class="comp-grid">
+        <div class="comp-cell">
+          <span class="comp-cell__title">Default · focus</span>
+          <div class="comp-cell__demo">
+            <input class="input" type="text" placeholder="hello@yourcompany.com" />
+            <input class="input" type="text" value="hello@mlops.ninja" />
+          </div>
+        </div>
+        <div class="comp-cell">
+          <span class="comp-cell__title">With label</span>
+          <div class="comp-cell__demo" style="flex-direction:column; align-items:flex-start; gap:8px;">
+            <span class="label">Project brief</span>
+            <textarea class="input" rows="3" placeholder="We have a fraud-detection model stuck in research…" style="width:100%; font-family: var(--font-body); font-size: 15px;"></textarea>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CARDS ============ -->
+    <section class="ds-sec" id="cards">
+      <div class="ds-sec__head">
+        <h2>Cards</h2>
+        <span class="id">09 · Components</span>
+      </div>
+      <p class="ds-sec__lead">Defined by 1px hairlines, not shadow. Hover deepens the border. Dark cards invert to slate and reserve sky for the accent.</p>
+
+      <div class="comp-grid">
+        <div class="card" style="grid-column: span 1;">
+          <div class="label" style="color: var(--on-surface-muted); margin-bottom: 12px;">01 · Case study</div>
+          <h3 style="font-family: var(--font-display); font-weight: 700; font-size: 22px; margin: 0 0 8px; letter-spacing: -0.015em;">Real-time fraud at Quantile</h3>
+          <p style="font-size: 14.5px; color: var(--on-surface-variant); margin: 0; line-height: 1.55;">Took a notebook prototype to a 42ms p99 production service serving 12k req/s.</p>
+        </div>
+        <div class="card" style="grid-column: span 1; background: var(--inverse-surface); color: #fff; border-color: var(--inverse-surface);">
+          <div class="label" style="color: rgba(255,255,255,.5); margin-bottom: 12px;">02 · Monitor</div>
+          <h3 style="font-family: var(--font-display); font-weight: 700; font-size: 22px; margin: 0 0 8px; letter-spacing: -0.015em; color: #fff;">Real-time observability</h3>
+          <p style="font-size: 14.5px; color: rgba(255,255,255,.65); margin: 0; line-height: 1.55;">Continuous tracking of performance, latency, and resource consumption.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ LOOP ============ -->
+    <section class="ds-sec" id="loop">
+      <div class="ds-sec__head">
+        <h2>Lifecycle loop</h2>
+        <span class="id">10 · Signature</span>
+      </div>
+      <p class="ds-sec__lead">The one piece of motion we own. The rail is the infinity path; the dashed flow animates anti-clockwise to suggest continuous improvement; six nodes are clickable, each routing to its service page.</p>
+
+      <div class="loop-demo">
+        <svg viewBox="0 0 600 360" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="dsFlow" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0" stop-color="#ff00ff"/>
+              <stop offset="1" stop-color="#00bcd4"/>
+            </linearGradient>
+          </defs>
+          <path class="demo-rail" d="M150,180 C150,80 250,80 300,180 C350,280 450,280 450,180 C450,80 350,80 300,180 C250,280 150,280 150,180" />
+          <path class="demo-flow" d="M150,180 C150,80 250,80 300,180 C350,280 450,280 450,180 C450,80 350,80 300,180 C250,280 150,280 150,180" />
+
+          <g><circle cx="150" cy="180" r="11" fill="#fff" stroke="#0ea5e9" stroke-width="2.5"/><text x="150" y="156" text-anchor="middle" font-family="JetBrains Mono" font-size="9" font-weight="600" letter-spacing="1.5" fill="#3e4850">EDA</text></g>
+          <g><circle cx="225" cy="105" r="11" fill="#fff" stroke="#0ea5e9" stroke-width="2.5"/><text x="225" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="9" font-weight="600" letter-spacing="1.5" fill="#3e4850">DATA PREP</text></g>
+          <g><circle cx="300" cy="180" r="16" fill="#131b2e" stroke="#131b2e"/><text x="300" y="184" text-anchor="middle" font-family="JetBrains Mono" font-size="9" font-weight="700" letter-spacing="1.5" fill="#fff">DEVELOP</text></g>
+          <g><circle cx="375" cy="255" r="11" fill="#fff" stroke="#0ea5e9" stroke-width="2.5"/><text x="375" y="278" text-anchor="middle" font-family="JetBrains Mono" font-size="9" font-weight="600" letter-spacing="1.5" fill="#3e4850">RETRAIN</text></g>
+          <g><circle cx="450" cy="180" r="11" fill="#fff" stroke="#ea57ff" stroke-width="2.5"/><text x="450" y="156" text-anchor="middle" font-family="JetBrains Mono" font-size="9" font-weight="600" letter-spacing="1.5" fill="#3e4850">DEPLOY</text></g>
+          <g><circle cx="225" cy="255" r="11" fill="#fff" stroke="#ea57ff" stroke-width="2.5"/><text x="225" y="278" text-anchor="middle" font-family="JetBrains Mono" font-size="9" font-weight="600" letter-spacing="1.5" fill="#3e4850">MONITOR</text></g>
+        </svg>
+        <span class="label">Default · light surface</span>
+      </div>
+    </section>
+
+    <!-- ============ VOICE ============ -->
+    <section class="ds-sec" id="voice">
+      <div class="ds-sec__head">
+        <h2>Voice &amp; tone</h2>
+        <span class="id">11 · Language</span>
+      </div>
+      <p class="ds-sec__lead">Plain, confident, slightly understated. We're senior — we don't need to sell hard. Verbs over adjectives. Specific over abstract.</p>
+
+      <div class="voice-grid">
+        <div class="voice-cell voice-cell--do">
+          <div class="head"><span class="dot"></span><span>Do</span></div>
+          <p>"We ship ML systems that don't fall over."</p>
+          <p>"42ms p99, 99.98% uptime, drift 0.02."</p>
+          <p>"Took a notebook prototype to production in 6 weeks."</p>
+        </div>
+        <div class="voice-cell voice-cell--dont">
+          <div class="head"><span class="dot"></span><span>Don't</span></div>
+          <p>"Unlock unprecedented synergies with AI-powered transformations."</p>
+          <p>"Best-in-class enterprise-grade leveraged ML platform."</p>
+          <p>"🚀 Supercharge your data pipelines!"</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>

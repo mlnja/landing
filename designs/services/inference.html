@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inference Infrastructure · MLOps.Ninja</title>
+<link rel="stylesheet" href="../styles/tokens.css" />
+<style>
+  body { background: var(--surface-container-lowest); }
+
+  /* ============ HERO ============ */
+  .svc-hero {
+    padding: var(--space-7) 0 var(--space-7);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .svc-hero__inner {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: var(--space-7);
+    align-items: center;
+  }
+  .breadcrumbs {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: var(--space-3);
+  }
+  .breadcrumbs a { color: var(--on-surface-muted); text-decoration: none; }
+  .breadcrumbs a:hover { color: var(--on-surface); }
+  .breadcrumbs .sep { margin: 0 8px; color: var(--outline-variant); }
+  .breadcrumbs .current { color: var(--on-surface); }
+
+  .svc-hero__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--secondary);
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-bottom: var(--space-3);
+    white-space: nowrap;
+  }
+  .svc-hero__eyebrow .dot {
+    width: 7px; height: 7px;
+    background: var(--secondary-container);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(234,87,255,.15);
+  }
+  .svc-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(48px, 6.2vw, 88px);
+    line-height: 0.96;
+    letter-spacing: -0.03em;
+    margin: 0 0 var(--space-3);
+    text-wrap: balance;
+  }
+  .svc-hero h1 em {
+    font-style: normal;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .svc-hero p.lead {
+    font-size: 18.5px;
+    line-height: 1.55;
+    color: var(--on-surface-variant);
+    margin: 0 0 var(--space-5);
+    max-width: 540px;
+    text-wrap: pretty;
+  }
+  .svc-hero .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* ====== MINI LOOP (brand logo) ====== */
+  .mini-loop {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    aspect-ratio: 600 / 340;
+    margin-left: auto;
+  }
+  .mini-loop::before {
+    content: "";
+    position: absolute; inset: -8%;
+    background:
+      radial-gradient(ellipse 46% 60% at 28% 50%, rgba(14,165,233,.10) 0%, transparent 70%),
+      radial-gradient(ellipse 46% 60% at 72% 50%, rgba(234,87,255,.10) 0%, transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+  .mini-svg { position: relative; width: 100%; height: 100%; overflow: visible; }
+  .mini-seg {
+    cursor: pointer;
+    opacity: 0.55;
+    transition: opacity 200ms, filter 200ms;
+  }
+  a:hover .mini-seg { opacity: 0.85; }
+  .mini-seg.is-current {
+    opacity: 1;
+    filter: drop-shadow(0 0 10px currentColor);
+  }
+  .mini-seg-label {
+    font-family: var(--font-mono);
+    font-weight: 700; font-size: 12px;
+    letter-spacing: 0.08em;
+    fill: #fff;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+    opacity: 0.85;
+  }
+  a:hover .mini-seg-label, .is-current + .mini-seg-label { opacity: 1; }
+  .mini-big-label {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 42px;
+    fill: var(--on-surface);
+    cursor: pointer;
+    transition: fill 200ms, letter-spacing 200ms;
+  }
+  .mini-big-label:hover { fill: var(--secondary); letter-spacing: 0.04em; }
+  .mini-big-label.is-current {
+    fill: var(--on-surface);
+    text-decoration: underline;
+    text-decoration-color: var(--secondary-container);
+    text-underline-offset: 6px;
+    text-decoration-thickness: 3px;
+  }
+
+  /* Pillar bar under hero */
+  .pillars {
+    border-bottom: 1px solid var(--hairline);
+    background: var(--surface);
+  }
+  .pillars__inner {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .pillar {
+    padding: var(--space-3) var(--space-4);
+    border-right: 1px solid var(--hairline);
+  }
+  .pillar:last-child { border-right: 0; }
+  .pillar__k {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: 6px;
+  }
+  .pillar__v {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 22px; letter-spacing: -0.015em;
+    color: var(--on-surface);
+  }
+
+  /* Sections */
+  .section { padding: var(--space-8) 0; border-top: 1px solid var(--hairline); }
+  .section:first-of-type { border-top: 0; }
+  .section__head {
+    display: grid; grid-template-columns: 1fr auto;
+    align-items: baseline; gap: var(--space-3);
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .section__head h2 {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 36px;
+    line-height: 1.05; letter-spacing: -0.02em;
+    margin: 0;
+    text-wrap: balance;
+  }
+  .section__head .id {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+  .section__lead {
+    font-size: 16px; color: var(--on-surface-variant);
+    max-width: 640px; line-height: 1.6;
+    margin: -10px 0 var(--space-5);
+  }
+
+  /* Includes cards */
+  .includes-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-1);
+  }
+  .card {
+    padding: var(--space-4);
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    display: flex; flex-direction: column;
+    min-height: 200px;
+  }
+  .card__num {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.16em;
+    color: var(--on-surface-muted);
+    margin-bottom: var(--space-3);
+  }
+  .card__title {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 20px;
+    line-height: 1.2; letter-spacing: -0.012em;
+    margin: 0 0 10px;
+  }
+  .card__body {
+    font-size: 14.5px; line-height: 1.6;
+    color: var(--on-surface-variant);
+    margin: 0;
+  }
+
+  /* Process steps */
+  .process { background: var(--surface); }
+  .process-list {
+    display: grid; gap: var(--space-3);
+  }
+  .step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
+    border-top: 1px solid var(--hairline);
+  }
+  .step:first-child { border-top: 0; padding-top: 0; }
+  .step__num {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    color: var(--secondary);
+    font-weight: 600;
+  }
+  .step__title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: -0.015em;
+    margin: 0 0 6px;
+  }
+  .step__body {
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--on-surface-variant);
+    max-width: 700px;
+    margin: 0;
+  }
+
+  /* Stack + outputs */
+  .deliv {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--space-5);
+  }
+  .stack-tags {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: var(--space-3);
+  }
+  .stack-tag {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    padding: 8px 12px;
+    border: 1px solid var(--hairline);
+    background: var(--surface-container-lowest);
+    color: var(--on-surface);
+    letter-spacing: 0.02em;
+  }
+  .outputs ul {
+    list-style: none; margin: var(--space-3) 0 0; padding: 0;
+  }
+  .outputs li {
+    padding: 12px 0;
+    border-top: 1px solid var(--hairline);
+    font-family: var(--font-display);
+    font-weight: 600; font-size: 16px;
+    letter-spacing: -0.005em;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .outputs li::before {
+    content: "↳";
+    color: var(--on-surface-muted);
+    font-family: var(--font-mono);
+  }
+  .outputs li:last-child { padding-bottom: 0; }
+  .deliv__title {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--on-surface-muted);
+  }
+
+  /* Covers (category page) */
+  .covers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-1);
+  }
+  .cover {
+    display: block;
+    padding: var(--space-4);
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    text-decoration: none; color: inherit;
+    transition: border-color 200ms, transform 200ms;
+  }
+  .cover:hover { border-color: var(--on-surface-variant); transform: translateY(-2px); }
+  .cover__dot {
+    width: 10px; height: 10px;
+    border: 2.5px solid var(--primary-container);
+    margin-bottom: var(--space-2);
+  }
+  .cover__dot--fuchsia { border-color: var(--secondary-container); }
+  .cover__num {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.14em;
+    color: var(--on-surface-muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .cover__name {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 22px;
+    letter-spacing: -0.015em;
+    margin: 0 0 4px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .cover__name .arrow { color: var(--on-surface-muted); font-family: var(--font-mono); }
+  .cover:hover .arrow { color: var(--primary); }
+  .cover__blurb {
+    font-size: 14px;
+    color: var(--on-surface-variant);
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  /* Adjacent stages */
+  .adjacent { padding: var(--space-7) 0; background: var(--surface); border-top: 1px solid var(--hairline); border-bottom: 1px solid var(--hairline); }
+  .adjacent__inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-1);
+  }
+  .adj {
+    display: block;
+    padding: var(--space-4);
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    text-decoration: none; color: inherit;
+    transition: border-color 200ms, transform 200ms;
+  }
+  .adj:hover { border-color: var(--on-surface-variant); transform: translateY(-2px); }
+  .adj__k {
+    font-family: var(--font-mono);
+    font-size: 11px; letter-spacing: 0.14em;
+    color: var(--on-surface-muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .adj__title {
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 24px;
+    letter-spacing: -0.015em;
+    margin: 0 0 6px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .adj__title .arrow { color: var(--on-surface-muted); font-family: var(--font-mono); font-weight: 400; }
+  .adj:hover .arrow { color: var(--primary); }
+  .adj__body {
+    font-size: 14px;
+    color: var(--on-surface-variant);
+    margin: 0;
+  }
+
+  /* CTA */
+  .cta { padding: var(--space-8) 0; background: var(--on-surface); color: #fff; }
+  .cta__inner {
+    display: grid; grid-template-columns: 2fr 1fr;
+    gap: var(--space-5); align-items: center;
+  }
+  .cta h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 0;
+    color: #fff;
+    text-wrap: balance;
+  }
+  .cta h2 em {
+    font-style: normal;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .cta .btn--white {
+    background: #fff; color: var(--on-surface);
+    padding: 18px 28px; font-size: 16px;
+    justify-self: end;
+  }
+  .cta .btn--white:hover { background: var(--primary-container); color: #fff; }</style>
+</head>
+<body data-screen-label="Service · Inference">
+
+<script>window.SITE_BASE = "../";</script>
+<header id="site-header" data-active="lifecycle"></header>
+
+<!-- HERO -->
+<section class="svc-hero">
+  <div class="container svc-hero__inner">
+    <div>
+      <div class="breadcrumbs">
+        <a href="../index.html">Home</a><span class="sep">/</span>
+        <a href="../index.html">Lifecycle</a><span class="sep">/</span>
+        <span class="current">Inference</span>
+      </div>
+      <div class="svc-hero__eyebrow">
+        <span class="dot"></span>
+        <span>Stage · 06 of 09</span>
+      </div>
+      <h1>Inference Infrastructure.</h1>
+      <p class="lead">The runtime layer between a trained model and the production traffic hitting it. Right engine for the workload, right hardware budget, right batching strategy — with benchmarks that survive contact with reality.</p>
+      <div class="actions">
+        <a href="../contact.html" class="btn btn--primary">Start a project</a>
+        <a href="monitor.html" class="btn btn--ghost">Next · Monitor →</a>
+      </div>
+    </div>
+
+    <div class="mini-loop">
+      <svg class="mini-svg" viewBox="0 0 600 340" xmlns="http://www.w3.org/2000/svg">
+        <a href="eda.html" data-label="EDA">
+          <path class="mini-seg" d="M180.2,75.6c47.4,5.4,84.2,45.6,84.2,94.4c0-38.8,13.3-74.6,35.6-102.9C271.6,31.1,228.7,7.2,180.2,4l-13.9,35.8L180.2,75.6z" fill="#7dd3fc"/>
+          <text class="mini-seg-label" x="247" y="64" text-anchor="middle" dominant-baseline="central" transform="rotate(38 247 64)">EDA</text>
+        </a>
+        <a href="data-prep.html" data-label="DATA PREP">
+          <path class="mini-seg" d="M74.7,161.1c4.5-48.3,45.1-86.2,94.6-86.2c1.2,0,2.3,0,3.5,0.1l-13.7-35.2l14-36.1c-1.3,0-2.6,0-3.8,0C80.5,3.7,7.9,73.3,3.2,161l35.9,13.9L74.7,161.1z" fill="#38bdf8"/>
+          <text class="mini-seg-label" x="76" y="76" text-anchor="middle" dominant-baseline="central" transform="rotate(-44 76 76)">DATA PREP</text>
+        </a>
+        <a href="develop.html" data-label="DEVELOP">
+          <path class="mini-seg" d="M159.3,264.5c-47.8-5-85-45.4-85-94.5c0-0.5,0-1.1,0-1.6l-35.2,13.7L3,168.1c0,0.6,0,1.3,0,1.9c0,88.6,69.3,161,156.6,166l13.7-35.4L159.3,264.5z" fill="#0ea5e9"/>
+          <text class="mini-seg-label" x="78" y="265" text-anchor="middle" dominant-baseline="central" transform="rotate(45 78 265)">DEVELOP</text>
+        </a>
+        <a href="retrain.html" data-label="(RE)TRAIN">
+          <path class="mini-seg" d="M335.3,180.5L300.5,167l-34,13.2l0,0l-0.5,0.2l-1.3,0.5c0,0,0,0,0,0.1c0,0,0,0,0,0l-1,0.4c-5.6,47.2-45.7,83.8-94.4,83.8c-0.9,0-1.8,0-2.7,0l13.8,35.7l-13.8,35.6c0.9,0,1.8,0,2.7,0c53,0,100.2-24.8,130.7-63.4c0,0,0-0.1,0-0.1C320.3,247.1,333.1,215.2,335.3,180.5z" fill="#0284c7"/>
+          <text class="mini-seg-label" x="256" y="272" text-anchor="middle" dominant-baseline="central" transform="rotate(-32 256 272)">(RE)TRAIN</text>
+        </a>
+        <a href="review.html" data-label="REVIEW">
+          <path class="mini-seg" d="M458.8,6.1c-9.2-1.6-18.6-2.4-28.1-2.4c-53,0-100.2,24.8-130.7,63.4c-22.3,28.3-35.6,64-35.6,102.9c0,1.3,0,2.6,0,3.8l36.1-14l35.1,13.6c0-1.2,0-2.3,0-3.5c0-52.5,42.6-95,95-95c4.3,0,8.5,0.3,12.7,0.8l21.1-31.3L458.8,6.1z" fill="#f0abfc"/>
+          <text class="mini-seg-label" x="351" y="64" text-anchor="middle" dominant-baseline="central" transform="rotate(-40 351 64)">REVIEW</text>
+        </a>
+        <a href="deploy.html" data-label="DEPLOY">
+          <path class="mini-seg" d="M594.5,198.8c1.6-9.4,2.5-19,2.5-28.8c0-79.8-56.2-146.5-131.3-162.6l5.7,38.7l-20.9,31c43,9.1,75.2,47.3,75.2,93c0,4.2-0.3,8.4-0.8,12.5l32.2,21.8L594.5,198.8z" fill="#ea57ff"/>
+          <text class="mini-seg-label" x="533" y="92" text-anchor="middle" dominant-baseline="central" transform="rotate(58 533 92)">DEPLOY</text>
+        </a>
+        <a href="inference.html" data-label="INFERENCE">
+          <path class="mini-seg is-current" d="M523.7,189.7c-9.1,43-47.3,75.4-93,75.4c-4.2,0-8.3-0.3-12.4-0.8L396.4,297l5.6,36.9c9.3,1.6,18.9,2.5,28.7,2.5c79.6,0,146.1-55.9,162.5-130.6l-37.6,5.5L523.7,189.7z" fill="#c026d3"/>
+          <text class="mini-seg-label" x="508" y="276" text-anchor="middle" dominant-baseline="central" transform="rotate(-34 508 276)">INFERENCE</text>
+        </a>
+        <a href="monitor.html" data-label="MONITOR">
+          <path class="mini-seg" d="M411.1,263c-39.7-8.3-70.2-41.3-74.9-82.2l-0.9-0.4c-2.2,34.8-15,66.7-35.3,92.4c23.4,29.7,56.8,51.2,95,59.6l-5.6-37.1L411.1,263z" fill="#a21caf"/>
+          <text class="mini-seg-label" x="343" y="266" text-anchor="middle" dominant-baseline="central" transform="rotate(41 343 266)">MONITOR</text>
+        </a>
+        <a href="ml.html" data-label="ML · the model side of MLOps →">
+          <text class="mini-big-label" x="169" y="170" text-anchor="middle" dominant-baseline="central">ML</text>
+        </a>
+        <a href="ops.html" data-label="OPS · the production side of MLOps →">
+          <text class="mini-big-label" x="430" y="170" text-anchor="middle" dominant-baseline="central">OPS</text>
+        </a>
+      </svg></div>
+  </div>
+</section>
+
+<!-- PILLARS -->
+<section class="pillars">
+  <div class="container">
+    <div class="pillars__inner">
+        <div class="pillar">
+          <div class="pillar__k">Typical engagement</div>
+          <div class="pillar__v">3–6 weeks</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar__k">Best when</div>
+          <div class="pillar__v">Latency or cost is the bottleneck</div>
+        </div>
+        <div class="pillar">
+          <div class="pillar__k">Deliverable</div>
+          <div class="pillar__v">Tuned runtime + benchmark report</div>
+        </div></div>
+  </div>
+</section>
+
+
+  <section class="section">
+    <div class="container">
+      <div class="section__head">
+        <h2>What it includes</h2>
+        <span class="id">01 · Scope</span>
+      </div>
+      <p class="section__lead">Live predictions, p99 you can defend.</p>
+      <div class="includes-grid">
+      <article class="card">
+        <div class="card__num">01</div>
+        <h3 class="card__title">Runtime selection</h3>
+        <p class="card__body">FastAPI, Triton, vLLM, TGI, BentoML, ONNX Runtime, custom — chosen on your workload, not vendor whitepapers.</p>
+      </article>
+      <article class="card">
+        <div class="card__num">02</div>
+        <h3 class="card__title">Batching &amp; concurrency</h3>
+        <p class="card__body">Dynamic batching, continuous batching for LLMs, async serving — the techniques that move p99 the most for your shape of traffic.</p>
+      </article>
+      <article class="card">
+        <div class="card__num">03</div>
+        <h3 class="card__title">Hardware &amp; cost tuning</h3>
+        <p class="card__body">GPU vs CPU, quantisation, distillation, caching — a concrete cost-per-request number, not a slide.</p>
+      </article>
+      <article class="card">
+        <div class="card__num">04</div>
+        <h3 class="card__title">Benchmark &amp; SLO</h3>
+        <p class="card__body">Reproducible benchmark harness so future changes can prove they helped, not just claim it.</p>
+      </article></div>
+    </div>
+  </section>
+
+
+<!-- PROCESS -->
+<section class="section process">
+  <div class="container">
+    <div class="section__head">
+      <h2>How we deliver</h2>
+      <span class="id">02 · Process</span>
+    </div>
+    <div class="process-list">
+      <div class="step">
+        <div class="step__num">01</div>
+        <div>
+          <h3 class="step__title">Profile the current path</h3>
+          <p class="step__body">Where the time and money actually go — usually not where the team thinks.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step__num">02</div>
+        <div>
+          <h3 class="step__title">Pick the runtime</h3>
+          <p class="step__body">A/B benchmark on a representative slice, with the boring options always in the bake-off.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step__num">03</div>
+        <div>
+          <h3 class="step__title">Optimise</h3>
+          <p class="step__body">Quantise, batch, cache, prune — in that order. We stop when the cost-per-request hits target.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step__num">04</div>
+        <div>
+          <h3 class="step__title">Hand over the harness</h3>
+          <p class="step__body">So the next change to the model or hardware can be measured, not guessed at.</p>
+        </div>
+      </div></div>
+  </div>
+</section>
+
+
+  <section class="section">
+    <div class="container">
+      <div class="section__head">
+        <h2>Stack &amp; deliverables</h2>
+        <span class="id">03 · What you get</span>
+      </div>
+      <div class="deliv">
+        <div>
+          <div class="deliv__title">Stack we use</div>
+          <div class="stack-tags"><span class="stack-tag">Triton</span><span class="stack-tag">vLLM</span><span class="stack-tag">TGI</span><span class="stack-tag">BentoML</span><span class="stack-tag">ONNX Runtime</span><span class="stack-tag">TensorRT</span><span class="stack-tag">FastAPI</span><span class="stack-tag">Locust</span></div>
+        </div>
+        <div class="outputs">
+          <div class="deliv__title">You walk away with</div>
+          <ul><li>Tuned inference service</li><li>Benchmark harness</li><li>Cost-per-request report</li><li>SLO + capacity plan</li></ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- ADJACENT -->
+<section class="adjacent">
+  <div class="container">
+    <div class="adjacent__inner">
+      <a class="adj" href="deploy.html">
+        <div class="adj__k">← Previous</div>
+        <h3 class="adj__title">Deploy <span class="arrow">←</span></h3>
+        <p class="adj__body">The stage upstream of Inference.</p>
+      </a>
+      <a class="adj" href="monitor.html">
+        <div class="adj__k">Next →</div>
+        <h3 class="adj__title">Monitor <span class="arrow">→</span></h3>
+        <p class="adj__body">Where Inference hands off in the lifecycle.</p>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="container cta__inner">
+    <h2>Need help with <em>Inference Infrastructure</em>?<br/>Let&rsquo;s scope it.</h2>
+    <a href="../contact.html" class="btn btn--white">Start a project →</a>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+<script src="../chrome.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The people · MLOps.Ninja</title>
+<link rel="stylesheet" href="styles/tokens.css" />
+<style>
+  body { background: var(--surface-container-lowest); }
+
+  /* ============ HERO ============ */
+  .page-hero {
+    padding: var(--space-9) 0 var(--space-6);
+    position: relative;
+    overflow: hidden;
+  }
+  .page-hero::before {
+    content: "";
+    position: absolute; top: -30%; right: -8%;
+    width: 55%; height: 160%;
+    background:
+      radial-gradient(ellipse at 60% 40%, rgba(234,87,255,.05) 0%, transparent 55%),
+      radial-gradient(ellipse at 30% 60%, rgba(14,165,233,.06) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .page-hero__inner { max-width: 760px; position: relative; }
+  .page-hero__eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--on-surface-muted); margin-bottom: var(--space-3);
+    display: inline-flex; align-items: center; gap: 10px; white-space: nowrap;
+  }
+  .page-hero__eyebrow .dot { width: 6px; height: 6px; background: var(--secondary-container); border-radius: 50%; box-shadow: 0 0 0 4px rgba(234,87,255,.15); }
+  .page-hero h1 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(48px, 6.2vw, 88px); line-height: 0.96;
+    letter-spacing: -0.03em; margin: 0 0 var(--space-4); text-wrap: balance;
+  }
+  .page-hero h1 em {
+    font-style: normal;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .page-hero p.lead {
+    font-size: 19px; line-height: 1.55; color: var(--on-surface-variant);
+    max-width: 620px; margin: 0; text-wrap: pretty;
+  }
+
+  /* ============ TEAM ============ */
+  .team { padding: var(--space-6) 0 var(--space-8); }
+  .team__intro {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+    padding-bottom: var(--space-3);
+    border-bottom: 1px solid var(--hairline);
+    flex-wrap: wrap;
+  }
+  .section-eyebrow {
+    font-family: var(--font-mono); font-size: 11px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--on-surface-muted); margin-bottom: var(--space-2);
+  }
+  .section-title {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(28px, 3vw, 40px); line-height: 1.1;
+    letter-spacing: -0.02em; margin: 0; max-width: 520px; text-wrap: balance;
+  }
+  .team__intro p {
+    font-size: 15px; color: var(--on-surface-variant);
+    max-width: 320px; line-height: 1.55; margin: 0; text-wrap: pretty;
+  }
+
+  .team__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-3);
+  }
+  .ninja {
+    display: flex; flex-direction: column;
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    overflow: hidden;
+    transition: border-color 180ms, transform 180ms;
+  }
+  .ninja:hover { border-color: var(--on-surface-variant); transform: translateY(-2px); }
+  .ninja__photo {
+    aspect-ratio: 4 / 5;
+    max-height: 360px;
+    position: relative;
+    background:
+      linear-gradient(135deg, rgba(14,165,233,.08) 0%, rgba(234,87,255,.06) 100%),
+      repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px);
+    overflow: hidden;
+  }
+  .ninja__photo img {
+    width: 100%; height: 100%; object-fit: cover;
+    object-position: center 28%;
+    display: block;
+  }
+  .ninja__photo .role {
+    position: absolute; bottom: 12px; left: 12px;
+    font-family: var(--font-mono); font-size: 10.5px;
+    letter-spacing: 0.16em; text-transform: uppercase;
+    background: rgba(255,255,255,.95); color: var(--on-surface);
+    padding: 6px 10px; white-space: nowrap;
+  }
+  .ninja__photo .role--dark { background: var(--on-surface); color: #fff; }
+  .ninja__meta {
+    padding: var(--space-3) var(--space-4) var(--space-4);
+    border-top: 1px solid var(--hairline);
+    display: flex; flex-direction: column; flex: 1;
+  }
+  .ninja__name {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: 20px; letter-spacing: -0.015em; margin: 0 0 3px;
+  }
+  .ninja__handle {
+    font-family: var(--font-mono); font-size: 11.5px;
+    color: var(--on-surface-muted); letter-spacing: 0.04em; margin-bottom: var(--space-3);
+  }
+  .ninja__bio {
+    font-size: 13.5px; color: var(--on-surface-variant);
+    line-height: 1.55; margin: 0 0 var(--space-3); text-wrap: pretty;
+  }
+  .ninja__tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ninja__tag {
+    font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.06em;
+    color: var(--on-surface-variant); background: var(--surface);
+    padding: 4px 8px; border: 1px solid var(--hairline);
+  }
+  .ninja__links {
+    margin-top: var(--space-4); padding-top: var(--space-3);
+    border-top: 1px solid var(--hairline);
+    display: flex; gap: var(--space-4);
+  }
+  .ninja__link {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--font-mono); font-size: 11.5px;
+    letter-spacing: 0.04em; color: var(--on-surface-variant);
+    text-decoration: none; transition: color 150ms;
+  }
+  .ninja__link:hover { color: var(--on-surface); }
+  .ninja__link svg { width: 15px; height: 15px; }
+
+  /* ---- Vacant / join-us card ---- */
+  .ninja--vacant {
+    border-style: dashed;
+    border-color: var(--outline-variant);
+    background:
+      repeating-linear-gradient(135deg, transparent 0 11px, rgba(234,87,255,.03) 11px 22px),
+      var(--surface);
+    text-decoration: none; color: inherit;
+  }
+  .ninja--vacant:hover {
+    border-color: var(--secondary-container);
+    transform: translateY(-2px);
+  }
+  .ninja__photo--vacant {
+    display: flex; align-items: center; justify-content: center;
+    background:
+      repeating-linear-gradient(135deg, transparent 0 9px, rgba(14,165,233,.04) 9px 18px),
+      var(--surface-container-low);
+    border-bottom: 1px dashed var(--outline-variant);
+  }
+  .vacant-mask {
+    display: flex; flex-direction: column; align-items: center; gap: 16px;
+    color: var(--on-surface-muted);
+  }
+  .vacant-mask svg { opacity: .55; }
+  .vacant-mask .tag {
+    font-family: var(--font-mono); font-size: 10.5px;
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .ninja--vacant .ninja__name { color: var(--on-surface); }
+  .ninja--vacant .ninja__handle { color: var(--secondary); }
+  .ninja__cta {
+    margin-top: var(--space-4); padding-top: var(--space-3);
+    border-top: 1px dashed var(--outline-variant);
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono); font-size: 11.5px;
+    letter-spacing: 0.06em; color: var(--on-surface);
+  }
+  .ninja__cta .arrow { transition: transform 160ms; }
+  .ninja--vacant:hover .ninja__cta .arrow { transform: translateX(4px); }
+
+  /* ============ CLOSER ============ */
+  .closer { border-top: 1px solid var(--hairline); background: var(--surface); padding: var(--space-8) 0; }
+  .closer__inner { max-width: 760px; }
+  .closer .section-eyebrow { margin-bottom: var(--space-2); }
+  .closer h2 {
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(30px, 3.6vw, 46px); line-height: 1.08;
+    letter-spacing: -0.025em; margin: 0 0 var(--space-3); text-wrap: balance;
+  }
+  .closer p {
+    font-size: 17px; line-height: 1.6; color: var(--on-surface-variant);
+    margin: 0 0 var(--space-5); max-width: 600px; text-wrap: pretty;
+  }
+  .closer__actions { display: flex; flex-wrap: wrap; gap: 12px; }
+  .closer .gh { width: 16px; height: 16px; }
+
+  .ninja__photo a { display: block; width: 100%; height: 100%; }
+  .ninja__name a { color: inherit; text-decoration: none; transition: color 150ms ease; }
+  .ninja__name a:hover { color: var(--primary); }
+
+  @media (max-width: 560px) {
+    .team__grid { grid-template-columns: 1fr; }
+    .ninja__photo { aspect-ratio: 4 / 3; max-height: 300px; }
+  }
+</style>
+</head>
+<body data-screen-label="The people">
+
+<header id="site-header" data-active="about"></header>
+
+<!-- HERO -->
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero__inner">
+      <div class="page-hero__eyebrow"><span class="dot"></span><span>The people</span></div>
+      <h1>The people <em>behind the work</em>.</h1>
+      <p class="lead">
+        MLOps.Ninja is written and built by practitioners, not marketers. The
+        name on the post is the person who shipped the thing &mdash; and everything
+        we learn along the way ends up here or in the open repos.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- TEAM -->
+<section class="team">
+  <div class="container">
+    <div class="team__intro">
+      <div>
+        <div class="section-eyebrow">The ninjas</div>
+        <h2 class="section-title">Senior, hands-on, on the tools.</h2>
+      </div>
+      <p>Different backgrounds, the same standard: if we can&rsquo;t run it in production, we don&rsquo;t write about it.</p>
+    </div>
+
+    <div class="team__grid">
+
+      <!-- Dmitry -->
+      <article class="ninja">
+        <div class="ninja__photo">
+          <a href="connect/dmitry.html" aria-label="Connect with Dmitry Rubinstein"><img src="assets/people/dmitry.png" alt="Dmitry Rubinstein" /></a>
+          <span class="role">MLOps Ninja</span>
+        </div>
+        <div class="ninja__meta">
+          <h3 class="ninja__name"><a href="connect/dmitry.html">Dmitry Rubinstein</a></h3>
+          <div class="ninja__handle">@dmitry</div>
+          <p class="ninja__bio">
+            Builds the systems that keep the systems up. Twelve years between
+            research code and live inference. Writes mostly about deployment,
+            serving, and the unglamorous middle of the lifecycle.
+          </p>
+          <div class="ninja__tags">
+            <span class="ninja__tag">Kubeflow</span>
+            <span class="ninja__tag">Ray</span>
+            <span class="ninja__tag">PyTorch</span>
+            <span class="ninja__tag">Docker</span>
+          </div>
+          <div class="ninja__links">
+            <a class="ninja__link" href="https://github.com/mlnja" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/></svg>
+              GitHub
+            </a>
+            <a class="ninja__link" href="blog.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+              Posts
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Ilya -->
+      <article class="ninja">
+        <div class="ninja__photo">
+          <a href="connect/ilya.html" aria-label="Connect with Ilya Dvorkin"><img src="assets/people/ilya.png" alt="Ilya Dvorkin" /></a>
+          <span class="role role--dark">DevOps Ninja</span>
+        </div>
+        <div class="ninja__meta">
+          <h3 class="ninja__name"><a href="connect/ilya.html">Ilya Dvorkin</a></h3>
+          <div class="ninja__handle">@ilya</div>
+          <p class="ninja__bio">
+            Lives in cloud bills and Terraform plans. Specialises in untangling
+            the infrastructure other people thought they understood. Writes about
+            monitoring, retraining, and the cost of getting it wrong.
+          </p>
+          <div class="ninja__tags">
+            <span class="ninja__tag">Terraform</span>
+            <span class="ninja__tag">AWS</span>
+            <span class="ninja__tag">GitOps</span>
+            <span class="ninja__tag">Observability</span>
+          </div>
+          <div class="ninja__links">
+            <a class="ninja__link" href="https://github.com/mlnja" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/></svg>
+              GitHub
+            </a>
+            <a class="ninja__link" href="blog.html">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+              Posts
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Join us — this could be you -->
+      <a class="ninja ninja--vacant" href="contact.html">
+        <div class="ninja__photo ninja__photo--vacant">
+          <div class="vacant-mask">
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+              <path d="M3 9.5C3 8 5 7 12 7s9 1 9 2.5c0 1-1 1.4-2 1.5-.4 2.6-3.3 4-7 4s-6.6-1.4-7-4c-1-.1-2-.5-2-1.5Z"/>
+              <circle cx="9" cy="10.4" r="1.1" fill="currentColor" stroke="none"/>
+              <circle cx="15" cy="10.4" r="1.1" fill="currentColor" stroke="none"/>
+              <path d="M8.5 18.5c1 .6 2.2 1 3.5 1s2.5-.4 3.5-1"/>
+            </svg>
+            <span class="tag">Open slot</span>
+          </div>
+        </div>
+        <div class="ninja__meta">
+          <h3 class="ninja__name">This could be you</h3>
+          <div class="ninja__handle">@your-handle-here</div>
+          <p class="ninja__bio">
+            We add a ninja when the next one clearly raises the bar &mdash; someone
+            who ships in production and would rather write about it than keep it secret.
+            Sound like you?
+          </p>
+          <div class="ninja__tags">
+            <span class="ninja__tag">Your stack</span>
+            <span class="ninja__tag">Your opinions</span>
+            <span class="ninja__tag">Your repos</span>
+          </div>
+          <span class="ninja__cta">Pitch yourself <span class="arrow">→</span></span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<footer id="site-footer"></footer>
+<script src="chrome.js"></script>
+
+</body>
+</html>

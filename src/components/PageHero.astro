@@ -1,0 +1,84 @@
+---
+export interface Props {
+  eyebrow: string;
+  title: string;
+  lead: string;
+}
+
+const { eyebrow, title, lead } = Astro.props;
+---
+
+<section class="page-hero">
+  <div class="container">
+    <div class="page-hero__inner">
+      <div class="page-hero__eyebrow">
+        <span class="dot"></span>
+        <span>{eyebrow}</span>
+      </div>
+      <h1 set:html={title}></h1>
+      <p class="lead">{lead}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .page-hero {
+    padding: var(--space-9) 0 var(--space-6);
+    position: relative;
+    overflow: hidden;
+  }
+  .page-hero::before {
+    content: "";
+    position: absolute; top: -30%; right: -8%;
+    width: 55%; height: 160%;
+    background:
+      radial-gradient(ellipse at 60% 40%, rgba(234,87,255,.05) 0%, transparent 55%),
+      radial-gradient(ellipse at 30% 60%, rgba(14,165,233,.06) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .page-hero__inner { max-width: 760px; position: relative; }
+  .page-hero__eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--on-surface-muted);
+    margin-bottom: var(--space-3);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  .page-hero__eyebrow .dot {
+    width: 6px;
+    height: 6px;
+    background: var(--secondary-container);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(234,87,255,.15);
+    flex-shrink: 0;
+  }
+  .page-hero h1 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(48px, 6.2vw, 88px);
+    line-height: 0.96;
+    letter-spacing: -0.03em;
+    margin: 0 0 var(--space-4);
+    text-wrap: balance;
+  }
+  .page-hero h1 :global(em) {
+    font-style: normal;
+    background: linear-gradient(95deg, #ea57ff 0%, #0ea5e9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .page-hero p.lead {
+    font-size: 19px;
+    line-height: 1.55;
+    color: var(--on-surface-variant);
+    max-width: 620px;
+    margin: 0;
+    text-wrap: pretty;
+  }
+</style>

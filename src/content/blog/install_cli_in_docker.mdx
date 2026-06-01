@@ -1,0 +1,140 @@
+---
+draft: true
+title: "Install CLI in Docker: The Multi-Arch Integrity Challenge"
+snippet: "How to securely install a CLI tool in a Docker image across multiple architectures without sacrificing convenience"
+cover: {
+  src: "./cli_in_docker.png",
+  alt: "Illustration of a Docker container with a CLI tool being added, highlighting the integrity challenge across multiple architectures."
+}
+publishDate: "2026-04-25"
+author: "virviil"
+tags: ["development", "tls", "security", "devops"]
+lifecycle: "develop"
+lifecycleSection: "dev"
+---
+
+Да, именно так. Это хороший narrative для статьи:
+
+## The Cute Version: Just ADD the Binary
+
+```dockerfile
+FROM scratch
+
+ARG VERSION=v0.1.0
+
+ADD https://github.com/acme/tama/releases/download/${VERSION}/tama-linux-amd64 /tama
+
+ENTRYPOINT ["/tama"]
+```
+
+Beautiful. No curl, no package manager, no Rust toolchain.
+
+But also: no integrity check.
+
+The Supply Chain Problem
+
+If that URL ever serves a different binary, your image silently bakes it in.
+
+Possible causes:
+
+compromised GitHub account
+replaced release asset
+DNS/TLS/proxy weirdness
+accidental re-upload
+malicious fork / wrong repo URL
+floating latest asset
+
+So this is convenient, but not production-safe.
+
+The Better Version: ADD --checksum
+
+Dockerfile supports ADD --checksum for remote HTTP(S) sources when using BuildKit / modern Dockerfile frontend.
+
+# syntax=docker/dockerfile:1.6
+
+FROM scratch
+
+ARG VERSION=v0.1.0
+
+ADD --checksum=sha256:PUT_SHA256_HERE \
+  https://github.com/acme/tama/releases/download/${VERSION}/tama-linux-amd64 \
+  /tama
+
+ENTRYPOINT ["/tama"]
+
+Now the build fails if GitHub serves anything other than the expected bytes.
+
+This keeps the original promise:
+
+no curl
+no package manager
+no shell
+no extra layer pollution
+still tiny
+The Catch: Multi-Arch Gets Awkward
+
+For single-arch images, ADD --checksum is great.
+
+For multi-arch builds, you usually want something like:
+
+ARG TARGETARCH
+
+ADD --checksum=sha256:${SHA_FOR_TARGETARCH} \
+  https://github.com/acme/tama/releases/download/${VERSION}/tama-linux-${TARGETARCH} \
+  /tama
+
+But this is where the elegance breaks down.
+
+TARGETARCH can select the URL, but the checksum must also change per architecture. Dockerfile instruction options are not a great place to express “if arch is amd64, use checksum A; if arm64, use checksum B”. In practice, this becomes clumsy.
+
+You can do this:
+
+# syntax=docker/dockerfile:1.6
+
+FROM scratch
+
+ARG VERSION=v0.1.0
+
+ADD --checksum=sha256:AMD64_SHA_HERE \
+  https://github.com/acme/tama/releases/download/${VERSION}/tama-linux-amd64 \
+  /tama-amd64
+
+ADD --checksum=sha256:ARM64_SHA_HERE \
+  https://github.com/acme/tama/releases/download/${VERSION}/tama-linux-arm64 \
+  /tama-arm64
+
+But now you downloaded both binaries.
+
+That is correct, but ugly.
+
+The Honest Conclusion
+
+ADD is beautiful for demos.
+
+ADD --checksum is beautiful for single-arch pinned binaries.
+
+Multi-arch secure installs need either:
+
+separate Dockerfiles per arch,
+generated Dockerfiles,
+multi-stage downloader with curl + sha256sum,
+or pre-downloading the binary in CI and using COPY.
+
+So the progression is:
+
+ADD URL
+  → cute, unsafe
+
+ADD --checksum
+  → safe, elegant, single-arch friendly
+
+multi-arch ADD --checksum
+  → possible, but awkward
+
+CI download + COPY
+  → boring, secure, production-grade
+
+And the punchline:
+
+Installing a CLI in Docker is easy.
+Installing it securely across architectures is where the abstraction leaks.

@@ -1,10 +1,10 @@
-// 1. Import utilities from `astro:content`
-import { z, defineCollection, reference } from 'astro:content';
+import { defineCollection, z } from 'astro:content';
+import { glob } from 'astro/loaders';
 
-// 2. Define your collection(s)
 const blog = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/blog' }),
   schema: ({ image }) => z.object({
-    draft: z.boolean(),
+    draft: z.boolean().default(false),
     title: z.string(),
     snippet: z.string(),
     cover: z.object({
@@ -13,66 +13,38 @@ const blog = defineCollection({
     }),
     publishDate: z.string().transform(str => new Date(str)),
     author: z.string().default('virviil'),
-    lifecycle: z.string(),
-    lifecycleSection: z.string(),
-    tags: z.array(z.string()),
+    category: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    lifecycle: z.string().optional(),
+    lifecycleSection: z.string().optional(),
   }),
 });
 
 const team = defineCollection({
-  schema: ({image}) =>  z.object({
-    draft: z.boolean(),
-    name: z.string(),
-    title: z.string(),
+  loader: glob({ pattern: '**/*.md', base: './src/content/team' }),
+  schema: ({ image }) => z.object({
+    firstName: z.string(),
+    lastName: z.string(),
+    role: z.string(),
+    handle: z.string(),
+    org: z.string().default('MLOps.Ninja'),
     avatar: z.object({
       src: image(),
-      alt: z.string(),
+      alt: z.string()
     }),
-    description: z.string().optional(),
-    publishDate: z.string().transform(str => new Date(str)),
+    bio: z.string(),
+    tags: z.array(z.string()),
+    links: z.object({
+      x: z.string().optional(),
+      threads: z.string().optional(),
+      linkedin: z.string().optional(),
+      github: z.string().optional(),
+      telegram: z.string().optional(),
+      email: z.string().optional()
+    }),
+    url: z.string(),
+    draft: z.boolean().default(false)
   }),
 });
 
-const lifecycle = defineCollection({
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    icon: z.string(),
-    sections: z.array(reference('section')),
-  }),
-});
-
-const section = defineCollection({
-  schema: z.object({
-    title: z.string(),
-    description: z.string(),
-    icon: z.string(),
-  }),
-});
-
-const certification = defineCollection({
-  schema: z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    publishDate: z.string().transform(str => new Date(str)).optional(),
-  }),
-});
-
-const products = defineCollection({
-  schema: z.object({
-    title: z.string(),
-    description: z.string().optional(),
-    publishDate: z.string().transform(str => new Date(str)).optional(),
-  }),
-});
-
-// 3. Export a single `collections` object to register your collection(s)
-//    This key should match your collection directory name in "src/content"
-export const collections = {
-  'blog': blog,
-  'team': team,
-  'lifecycle': lifecycle,
-  'section': section,
-  'certification': certification,
-  'products': products,
-};
+export const collections = { blog, team };

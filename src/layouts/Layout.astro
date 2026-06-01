@@ -1,88 +1,358 @@
 ---
-import { SEO } from "astro-seo";
-import Footer from "@components/footer.astro";
-import Navbar from "@components/navbar/navbar.astro";
-import '@fontsource-variable/podkova';
-
-// Import font files to get correct hashed paths
-import podkovaWoff2 from '@fontsource-variable/podkova/files/podkova-latin-wght-normal.woff2';
-
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import BackToTop from "../components/BackToTop.astro";
 
 export interface Props {
-  title: string;
+  title?: string;
   description?: string;
+  active?: string;
   image?: string;
+  article?: boolean;
 }
 
-const { title, description, image } = Astro.props;
+const {
+  title = "MLOps.Ninja — An open journal & workshop on production ML.",
+  description = "MLOps.Ninja is a journal and open-source workshop on production machine learning — field notes, strong opinions, and tools you can clone, from the people who actually ship it.",
+  active = "",
+  image = "/assets/og-image.png",
+  article = false
+} = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site).toString();
-
-const defaultImage = new URL("/opengraph.png", Astro.site).toString();
-const resolvedImageWithDomain = image ? new URL(image, Astro.site).toString() : defaultImage;
-
-const makeTitle = title
-  ? title + " | " + "MLOps.Ninja"
-  : "MLOps.Ninja - modern era of MLOps";
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const imageURL = new URL(image, Astro.site);
 ---
 
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
-    <link rel="icon" href="/logo.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
-    
-    <!-- Font preloading with dynamic hashed paths -->
-    <link rel="preload" href={podkovaWoff2} as="font" type="font/woff2" crossorigin />
 
-    <!-- <link rel="preload" as="image" href={src} alt="Hero" /> -->
-    <SEO
-      title={makeTitle}
-      description={description || "MLOps.Ninja - modern era of MLOps"}
-      canonical={canonicalURL}
-      twitter={{
-        creator: "@virviil",
-        site: "@mlops_ninja",
-        card: "summary_large_image",
-      }}
-      openGraph={{
-        basic: {
-          url: canonicalURL,
-          type: "website",
-          title: makeTitle,
-          image: resolvedImageWithDomain,
-        },
-        image: {
-          alt: "MLOps.Ninja",
-        },
-      }}
-    />
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={article ? "article" : "website"} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={imageURL} />
+    <meta property="og:site_name" content="MLOps.Ninja" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalURL} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={imageURL} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/assets/logo.svg" />
   </head>
-  <body class="flex flex-col min-h-screen">
-    <div class="flex-shrink-0">
-      <Navbar />
-    </div>
-    <div class="flex-grow">
-      <slot />
-    </div>
-    <div class="flex-shrink-0 mt-8">
-      <Footer />
-    </div>
-    <style is:global>
-      /* Improve Page speed */
-      /* https://css-tricks.com/almanac/properties/c/content-visibility/ */
-      img {
-        content-visibility: auto;
-      }
-      
-      /* Prevent font jumping during load */
-      @font-face {
-        font-family: 'Podkova Variable';
-        font-display: swap;
-      }
-      
-    </style>
+  <body>
+    <Navbar active={active} />
+    <slot />
+    <Footer />
+    <BackToTop />
   </body>
 </html>
+
+<style is:global>
+  @import url('https://fonts.googleapis.com/css2?family=Podkova:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    /* Surfaces */
+    --surface: #faf8ff;
+    --surface-bright: #ffffff;
+    --surface-dim: #d2d9f4;
+    --surface-container-lowest: #ffffff;
+    --surface-container-low: #f2f3ff;
+    --surface-container: #eaedff;
+    --surface-container-high: #e2e7ff;
+    --surface-container-highest: #dae2fd;
+
+    /* Ink */
+    --on-surface: #131b2e;
+    --on-surface-variant: #3e4850;
+    --on-surface-muted: #6e7881;
+    --outline: #6e7881;
+    --outline-variant: #bec8d2;
+    --hairline: #e2e8f0;
+
+    /* Inverse */
+    --inverse-surface: #131b2e;
+    --inverse-surface-2: #1c2540;
+    --inverse-on-surface: #eef0ff;
+    --inverse-on-surface-variant: #a8b1c9;
+
+    /* Brand: Sky */
+    --primary: #006591;
+    --primary-container: #0ea5e9;
+    --on-primary: #ffffff;
+    --on-primary-container: #003751;
+    --primary-fixed: #c9e6ff;
+
+    /* Brand: Fuchsia */
+    --secondary: #a200ba;
+    --secondary-container: #ea57ff;
+    --on-secondary: #ffffff;
+
+    /* Brand: Amber */
+    --tertiary: #8a5100;
+    --tertiary-container: #de8712;
+
+    /* Brand gradient */
+    --brand-gradient: linear-gradient(90deg, #ea57ff 0%, #0ea5e9 100%);
+    --brand-gradient-soft: linear-gradient(90deg, rgba(234,87,255,.12), rgba(14,165,233,.12));
+
+    /* Spacing */
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+    --space-5: 40px;
+    --space-6: 48px;
+    --space-7: 64px;
+    --space-8: 80px;
+    --space-9: 120px;
+    --container: 1280px;
+
+    /* Radii */
+    --radius-xs: 2px;
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+
+    /* Shadows */
+    --shadow-float: 0 20px 25px -5px rgba(19, 27, 46, .06), 0 8px 10px -6px rgba(19, 27, 46, .04);
+    --shadow-glow: 0 0 0 4px rgba(14, 165, 233, .12);
+
+    /* Type */
+    --font-display: 'Podkova', 'Iowan Old Style', 'Georgia', serif;
+    --font-body: 'Podkova', 'Iowan Old Style', 'Georgia', serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    font-feature-settings: "ss01", "kern";
+    background: var(--surface-container-lowest);
+    color: var(--on-surface);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    line-height: 1.55;
+  }
+  img, svg { display: block; max-width: 100%; }
+  button { font-family: inherit; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+  hr { border: 0; border-top: 1px solid var(--hairline); margin: 0; }
+
+  /* Layout primitives */
+  .container {
+    width: 100%;
+    max-width: var(--container);
+    margin: 0 auto;
+    padding-inline: var(--space-7);
+  }
+  @media (max-width: 720px) {
+    .container { padding-inline: var(--space-2); }
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1;
+    letter-spacing: -0.005em;
+    text-decoration: none;
+    transition: all 160ms ease;
+    white-space: nowrap;
+  }
+  .btn--primary {
+    background: var(--on-surface);
+    color: var(--surface-container-lowest);
+  }
+  .btn--primary:hover { transform: translateY(-1px); background: #000; }
+  .btn--sky {
+    background: var(--primary-container);
+    color: #fff;
+  }
+  .btn--sky:hover { background: #0892ce; }
+  .btn--ghost {
+    background: transparent;
+    color: var(--on-surface);
+    border-color: var(--outline-variant);
+  }
+  .btn--ghost:hover { border-color: var(--on-surface); }
+  .btn--text {
+    background: transparent;
+    color: var(--on-surface-variant);
+    padding: 8px 12px;
+  }
+  .btn--text:hover { color: var(--on-surface); }
+  .btn--sm { padding: 10px 14px; font-size: 13px; }
+
+  /* Chip */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    background: var(--surface-container-low);
+    border: 1px solid var(--outline-variant);
+    border-radius: var(--radius-xs);
+    white-space: nowrap;
+  }
+  .chip__dot {
+    width: 6px; height: 6px;
+    background: var(--secondary-container);
+    flex-shrink: 0;
+  }
+
+  /* Card */
+  .card {
+    background: var(--surface-container-lowest);
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+    transition: border-color 160ms ease;
+  }
+  .card:hover { border-color: var(--on-surface-variant); }
+
+  /* Article/Prose Styles */
+  .article > * + * { margin-top: var(--space-5); }
+  .article p {
+    font-size: 19px;
+    line-height: 1.65;
+    color: var(--on-surface);
+    margin: 0;
+  }
+  .article p + p {
+    margin-top: var(--space-3);
+  }
+  .article h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: var(--space-7) 0 var(--space-3);
+    color: var(--on-surface);
+    text-wrap: balance;
+  }
+  .article h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    margin: var(--space-5) 0 var(--space-2);
+  }
+  .article code {
+    font-family: var(--font-mono);
+    font-size: 0.82em;
+    background: var(--surface-container);
+    padding: 2px 7px;
+    border-radius: var(--radius-xs);
+    color: var(--on-surface);
+  }
+  .article a {
+    color: var(--primary);
+    text-decoration: underline;
+    text-decoration-color: rgba(14,165,233,.3);
+    text-underline-offset: 3px;
+    transition: text-decoration-color 160ms;
+  }
+  .article a:hover {
+    text-decoration-color: var(--primary);
+  }
+  .article ul, .article ol {
+    padding-left: 0;
+    list-style: none;
+    margin: 0;
+  }
+  .article ul li, .article ol li {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--on-surface);
+    padding: 4px 0 4px 28px;
+    position: relative;
+  }
+  .article ul li::before {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 16px;
+    width: 6px;
+    height: 6px;
+    background: var(--primary-container);
+  }
+  .article ol {
+    counter-reset: olist;
+  }
+  .article ol li {
+    counter-increment: olist;
+  }
+  .article ol li::before {
+    content: counter(olist, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 6px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--on-surface-muted);
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+  .article blockquote {
+    margin: var(--space-5) 0;
+    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
+    border-left: 3px solid var(--primary-container);
+    background: var(--surface);
+    font-family: var(--font-display);
+    font-size: 24px;
+    line-height: 1.35;
+    color: var(--on-surface);
+    letter-spacing: -0.012em;
+    text-wrap: balance;
+  }
+  .article blockquote p {
+    font-size: inherit;
+  }
+  .article pre {
+    margin: var(--space-4) 0;
+    padding: var(--space-4);
+    background: var(--inverse-surface);
+    border: 1px solid rgba(255,255,255,.08);
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+  }
+  .article pre code {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(255,255,255,.9);
+    background: transparent;
+    padding: 0;
+  }
+  .article img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+  }
+</style>
