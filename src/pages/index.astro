@@ -1,5 +1,11 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+
+const allPosts = await getCollection('blog', ({ data }) => !data.draft);
+const sortedPosts = allPosts.sort((a, b) => b.data.publishDate.valueOf() - a.data.publishDate.valueOf());
+const featuredPosts = sortedPosts.slice(0, 3);
 ---
 
 <Layout>
@@ -106,32 +112,34 @@ import Layout from "../layouts/Layout.astro";
         <a class="more" href="/blog">All posts →</a>
       </div>
       <div class="journal__grid">
-        <a class="essay" href="#">
-          <div class="essay__media essay__media--dark"><span class="cat">Deploy</span></div>
-          <div class="essay__body">
-            <div class="essay__cat">Deploy · Inference</div>
-            <h3 class="essay__title">Triton, vLLM, or just FastAPI? A decision framework.</h3>
-            <div class="essay__meta"><span class="author">Dmitry Rubinstein</span><span>· May 18, 2025</span></div>
-          </div>
-        </a>
-
-        <a class="essay" href="#">
-          <div class="essay__media"><span class="cat">Monitor</span></div>
-          <div class="essay__body">
-            <div class="essay__cat">Monitor · Drift</div>
-            <h3 class="essay__title">Drift metrics that aren't KL divergence.</h3>
-            <div class="essay__meta"><span class="author">Ilya Dvorkin</span><span>· May 04, 2025</span></div>
-          </div>
-        </a>
-
-        <a class="essay" href="#">
-          <div class="essay__media essay__media--accent"><span class="cat">Develop</span></div>
-          <div class="essay__body">
-            <div class="essay__cat">Develop · Experimentation</div>
-            <h3 class="essay__title">Stop tracking experiments in your notebook filename.</h3>
-            <div class="essay__meta"><span class="author">Ilya Dvorkin</span><span>· Apr 22, 2025</span></div>
-          </div>
-        </a>
+        {featuredPosts.map((post, idx) => {
+          const slug = post.id.split('/').pop()?.replace(/\.(md|mdx)$/, '') || post.id;
+          const mediaClass = idx === 0 ? 'essay__media--dark' : idx === 2 ? 'essay__media--accent' : '';
+          return (
+            <a class="essay" href={`/blog/${slug}`}>
+              <div class={`essay__media ${mediaClass}`}>
+                {post.data.cover?.src && (
+                  <Image
+                    src={post.data.cover.src}
+                    alt={post.data.cover.alt}
+                    width={600}
+                    height={338}
+                    class="essay__image"
+                  />
+                )}
+                <span class="cat">{post.data.lifecycle || post.data.category || 'Blog'}</span>
+              </div>
+              <div class="essay__body">
+                <div class="essay__cat">{post.data.lifecycle || post.data.category || 'General'}</div>
+                <h3 class="essay__title">{post.data.title}</h3>
+                <div class="essay__meta">
+                  <span class="author">{post.data.author}</span>
+                  <span>· {new Date(post.data.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+              </div>
+            </a>
+          );
+        })}
       </div>
     </div>
   </section>
@@ -147,48 +155,48 @@ import Layout from "../layouts/Layout.astro";
         <a class="more" href="https://github.com/mlnja" target="_blank" rel="noopener">github.com/mlnja →</a>
       </div>
       <div class="repos">
-        <a class="repo" href="https://github.com/mlnja" target="_blank" rel="noopener">
+        <a class="repo" href="https://github.com/mlnja/llmfmt" target="_blank" rel="noopener">
           <div class="repo__top">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/>
             </svg>
             <span class="ext">↗</span>
           </div>
-          <div class="repo__name"><span class="ns">mlnja/</span>driftwatch</div>
-          <p class="repo__desc">Concept- and data-drift monitoring that emits the three metrics we actually alert on — not a dashboard you'll ignore.</p>
+          <div class="repo__name"><span class="ns">mlnja/</span>llmfmt</div>
+          <p class="repo__desc">Deterministic CLI for converting structured data into compact, prompt-ready text for LLM workflows</p>
           <div class="repo__foot">
-            <span class="repo__lang repo__lang--py"><span class="swatch"></span>Python</span>
+            <span class="repo__lang repo__lang--rust"><span class="swatch"></span>Rust</span>
             <span>MIT</span>
           </div>
         </a>
 
-        <a class="repo" href="https://github.com/mlnja" target="_blank" rel="noopener">
+        <a class="repo" href="https://github.com/mlnja/tama" target="_blank" rel="noopener">
           <div class="repo__top">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/>
             </svg>
             <span class="ext">↗</span>
           </div>
-          <div class="repo__name"><span class="ns">mlnja/</span>lean-ml-docker</div>
-          <p class="repo__desc">Opinionated, four-line Dockerfiles for serving models. No venv, no 4 GB images, no cargo-culting. The post that started it lives in the journal.</p>
+          <div class="repo__name"><span class="ns">mlnja/</span>tama</div>
+          <p class="repo__desc">Agentic framework in pure Markdown</p>
           <div class="repo__foot">
-            <span class="repo__lang repo__lang--sh"><span class="swatch"></span>Dockerfile</span>
+            <span class="repo__lang repo__lang--rust"><span class="swatch"></span>Rust</span>
             <span>MIT</span>
           </div>
         </a>
 
-        <a class="repo" href="https://github.com/mlnja" target="_blank" rel="noopener">
+        <a class="repo" href="https://github.com/mlnja/oci2i" target="_blank" rel="noopener">
           <div class="repo__top">
             <svg viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.4 11.4 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5Z"/>
             </svg>
             <span class="ext">↗</span>
           </div>
-          <div class="repo__name"><span class="ns">mlnja/</span>notebook-to-prod</div>
-          <p class="repo__desc">A scaffold + checklist that turns a research notebook into a served, monitored endpoint — the boring path we walk on every project.</p>
+          <div class="repo__name"><span class="ns">mlnja/</span>oci2i</div>
+          <p class="repo__desc">TUI to interact with OCI compatible Container Registries</p>
           <div class="repo__foot">
-            <span class="repo__lang repo__lang--py"><span class="swatch"></span>Python</span>
-            <span>Apache-2.0</span>
+            <span class="repo__lang repo__lang--rust"><span class="swatch"></span>Rust</span>
+            <span>MIT</span>
           </div>
         </a>
       </div>
@@ -371,6 +379,15 @@ import Layout from "../layouts/Layout.astro";
   .essay__media {
     aspect-ratio: 16 / 9; position: relative;
     background: repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px);
+    overflow: hidden;
+  }
+  .essay__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
   .essay__media--accent { background: linear-gradient(135deg, rgba(14,165,233,.10), rgba(234,87,255,.07)), repeating-linear-gradient(135deg, var(--surface) 0 8px, var(--surface-container-low) 8px 16px); }
   .essay__media--dark { background: linear-gradient(135deg, rgba(234,87,255,.18), rgba(14,165,233,.16)), var(--inverse-surface); }
@@ -430,6 +447,7 @@ import Layout from "../layouts/Layout.astro";
   .repo__lang .swatch { width: 9px; height: 9px; border-radius: 50%; }
   .repo__lang--py .swatch { background: #3572A5; }
   .repo__lang--sh .swatch { background: #89e051; }
+  .repo__lang--rust .swatch { background: #dea584; }
 
   @media (max-width: 900px) {
     .hero__grid, .journal__grid, .repos { grid-template-columns: 1fr; }
