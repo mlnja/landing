@@ -12,10 +12,10 @@ tags: ["Kubeflow", "Ray", "PyTorch", "Docker"]
 links:
   x: "https://x.com/virviil"
   threads: "https://threads.net/@virviil"
-  linkedin: "https://linkedin.com/in/rubinstein"
+  linkedin: "https://linkedin.com/in/virviil"
   github: "https://github.com/virviil"
   telegram: "https://t.me/virviil"
-  email: "mailto:dmitry@mlops.ninja"
+  email: "mailto:z@mlops.ninja"
 url: "https://mlops.ninja/connect/virviil"
 draft: false
 ---
