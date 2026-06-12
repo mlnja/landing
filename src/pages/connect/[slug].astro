@@ -246,32 +246,48 @@ const avatarSrc = person.avatar.src.src;
     if (person.org) vcardLines.push(`ORG:${person.org}`);
     if (person.role) vcardLines.push(`TITLE:${person.role}`);
 
-    // Add all social links
+    // Add all social links with proper labels
+    let itemIndex = 1;
+
     if (person.links.email) {
       const email = person.links.email.replace('mailto:', '');
       vcardLines.push(`EMAIL;TYPE=INTERNET:${email}`);
     }
+
     if (person.links.telegram) {
-      vcardLines.push(`X-SOCIALPROFILE;TYPE=telegram:${person.links.telegram}`);
-      vcardLines.push(`URL:${person.links.telegram}`);
+      vcardLines.push(`item${itemIndex}.URL:${person.links.telegram}`);
+      vcardLines.push(`item${itemIndex}.X-ABLabel:Telegram`);
+      itemIndex++;
     }
+
     if (person.links.x) {
-      vcardLines.push(`X-SOCIALPROFILE;TYPE=x:${person.links.x}`);
-      vcardLines.push(`URL:${person.links.x}`);
+      vcardLines.push(`item${itemIndex}.URL:${person.links.x}`);
+      vcardLines.push(`item${itemIndex}.X-ABLabel:X (Twitter)`);
+      itemIndex++;
     }
+
     if (person.links.threads) {
-      vcardLines.push(`X-SOCIALPROFILE;TYPE=threads:${person.links.threads}`);
-      vcardLines.push(`URL:${person.links.threads}`);
+      vcardLines.push(`item${itemIndex}.URL:${person.links.threads}`);
+      vcardLines.push(`item${itemIndex}.X-ABLabel:Threads`);
+      itemIndex++;
     }
+
     if (person.links.linkedin) {
-      vcardLines.push(`X-SOCIALPROFILE;TYPE=linkedin:${person.links.linkedin}`);
-      vcardLines.push(`URL:${person.links.linkedin}`);
+      vcardLines.push(`item${itemIndex}.URL:${person.links.linkedin}`);
+      vcardLines.push(`item${itemIndex}.X-ABLabel:LinkedIn`);
+      itemIndex++;
     }
+
     if (person.links.github) {
-      vcardLines.push(`X-SOCIALPROFILE;TYPE=github:${person.links.github}`);
-      vcardLines.push(`URL:${person.links.github}`);
+      vcardLines.push(`item${itemIndex}.URL:${person.links.github}`);
+      vcardLines.push(`item${itemIndex}.X-ABLabel:GitHub`);
+      itemIndex++;
     }
-    if (person.url) vcardLines.push(`URL:${person.url}`);
+
+    if (person.url) {
+      vcardLines.push(`item${itemIndex}.URL:${person.url}`);
+      vcardLines.push(`item${itemIndex}.X-ABLabel:Website`);
+    }
 
     vcardLines.push('END:VCARD');
     const vcard = vcardLines.join('\r\n');
