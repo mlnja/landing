@@ -246,47 +246,28 @@ const avatarSrc = person.avatar.src.src;
     if (person.org) vcardLines.push(`ORG:${person.org}`);
     if (person.role) vcardLines.push(`TITLE:${person.role}`);
 
-    // Add all social links with proper labels
-    let itemIndex = 1;
-
+    // Add all social links
     if (person.links.email) {
       const email = person.links.email.replace('mailto:', '');
       vcardLines.push(`EMAIL;TYPE=INTERNET:${email}`);
     }
-
     if (person.links.telegram) {
-      vcardLines.push(`item${itemIndex}.URL:${person.links.telegram}`);
-      vcardLines.push(`item${itemIndex}.X-ABLabel:Telegram`);
-      itemIndex++;
+      vcardLines.push(`X-SOCIALPROFILE;TYPE=telegram:${person.links.telegram}`);
     }
-
     if (person.links.x) {
-      vcardLines.push(`item${itemIndex}.URL:${person.links.x}`);
-      vcardLines.push(`item${itemIndex}.X-ABLabel:X (Twitter)`);
-      itemIndex++;
+      vcardLines.push(`X-SOCIALPROFILE;TYPE=twitter:${person.links.x}`);
     }
-
     if (person.links.threads) {
-      vcardLines.push(`item${itemIndex}.URL:${person.links.threads}`);
-      vcardLines.push(`item${itemIndex}.X-ABLabel:Threads`);
-      itemIndex++;
+      vcardLines.push(`X-SOCIALPROFILE;TYPE=threads:${person.links.threads}`);
     }
-
     if (person.links.linkedin) {
-      vcardLines.push(`item${itemIndex}.URL:${person.links.linkedin}`);
-      vcardLines.push(`item${itemIndex}.X-ABLabel:LinkedIn`);
-      itemIndex++;
+      vcardLines.push(`X-SOCIALPROFILE;TYPE=linkedin:${person.links.linkedin}`);
     }
-
     if (person.links.github) {
-      vcardLines.push(`item${itemIndex}.URL:${person.links.github}`);
-      vcardLines.push(`item${itemIndex}.X-ABLabel:GitHub`);
-      itemIndex++;
+      vcardLines.push(`X-SOCIALPROFILE;TYPE=github:${person.links.github}`);
     }
-
     if (person.url) {
-      vcardLines.push(`item${itemIndex}.URL:${person.url}`);
-      vcardLines.push(`item${itemIndex}.X-ABLabel:Website`);
+      vcardLines.push(`URL;TYPE=WORK:${person.url}`);
     }
 
     vcardLines.push('END:VCARD');
