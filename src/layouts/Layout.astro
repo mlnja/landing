@@ -55,6 +55,10 @@ const imageURL = new URL(image, Astro.site);
     <link rel="icon" type="image/svg+xml" href="/assets/logo.svg" />
     <!-- RSS -->
     <link rel="alternate" type="application/rss+xml" title="MLOps.Ninja" href="/rss.xml" />
+    <!-- Font preloads — fetch before CSS is parsed so first paint has the real font -->
+    <link rel="preload" href="/fonts/podkova-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrains-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/jetbrains-mono-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <Navbar active={active} />
@@ -65,7 +69,34 @@ const imageURL = new URL(image, Astro.site);
 </html>
 
 <style is:global>
-  @import url('https://fonts.googleapis.com/css2?family=Podkova:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  @font-face {
+    font-family: 'Podkova Variable';
+    font-style: normal;
+    font-weight: 400 800;
+    font-display: swap;
+    src: url('/fonts/podkova-latin-wght-normal.woff2') format('woff2-variations');
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url('/fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');
+  }
+  @font-face {
+    font-family: 'JetBrains Mono';
+    font-style: normal;
+    font-weight: 600;
+    font-display: swap;
+    src: url('/fonts/jetbrains-mono-latin-600-normal.woff2') format('woff2');
+  }
 
   :root {
     /* Surfaces */
@@ -135,8 +166,8 @@ const imageURL = new URL(image, Astro.site);
     --shadow-glow: 0 0 0 4px rgba(14, 165, 233, .12);
 
     /* Type */
-    --font-display: 'Podkova', 'Iowan Old Style', 'Georgia', serif;
-    --font-body: 'Podkova', 'Iowan Old Style', 'Georgia', serif;
+    --font-display: 'Podkova Variable', 'Iowan Old Style', 'Georgia', serif;
+    --font-body: 'Podkova Variable', 'Iowan Old Style', 'Georgia', serif;
     --font-mono: 'JetBrains Mono', 'SF Mono', Menlo, Consolas, monospace;
   }
 
